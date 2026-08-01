@@ -674,7 +674,7 @@ export default function App() {
     const allTotal = active.reduce((s,m)=>s+m.vol,0);
     const avgVol = active.length > 0 ? allTotal/active.length : 0;
     const best = monthVols.reduce((mx,m)=>m.vol>mx.vol?m:mx, monthVols[0]);
-    const curVol = RAW.feb?.[info.code]||0;
+    const curVol = RAW[filter]?.[info.code]||0;
     const curFee = toFee(curVol);
     const targetPct = info.target>0 ? (curFee/info.target)*100 : null;
     // rank each month
