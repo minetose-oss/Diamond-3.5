@@ -332,7 +332,7 @@ const TEAM5_INFO: Member[] = [
   // ── สมาชิกใหม่ (เพิ่มใหม่) ──
   { ic:"8515", code:"5_8515", name:"หนู",         province:"พิษณุโลก",     region:"เหนือ",  salary:50_000, target:65_000 },
   { ic:"8513", code:"5_8513", name:"พี่ตั้ม",    province:"สระบุรี",        region:"กลาง",  salary:50_000, target:65_000 },
-  { ic:"8493", code:"5_8493", name:"ฝน",          province:"สระบุรี",        region:"กลาง",  salary:0, target:0 },
+  { ic:"8493", code:"5_8493", name:"ฝน",          province:"สระบุรี",        region:"กลาง",  salary:50_000, target:65_000 },
   { ic:"8491", code:"5_8491", name:"ปุยฝ้าย",  province:"เชียงราย",      region:"เหนือ",  salary:50_000, target:65_000 },
 ];
 
