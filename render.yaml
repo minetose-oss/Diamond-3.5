@@ -2,7 +2,10 @@ services:
   - type: web
     name: diamond-3-5
     env: static
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --no-audit --no-fund && rm -rf node_modules/.vite-temp && npx vite build
     staticPublishPath: dist
     pullRequestPreviewsEnabled: false
     autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20
