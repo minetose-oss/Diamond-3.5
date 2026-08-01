@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html.dark { background: #111827; color: #f3f4f6; }
+html.dark .bg-white { background: #1f2937 !important; }
+html.dark .bg-gray-50 { background: #111827 !important; }
+html.dark .bg-gray-100 { background: #1f2937 !important; }
+html.dark .text-gray-900 { color: #f3f4f6 !important; }
+html.dark .text-gray-800 { color: #e5e7eb !important; }
+html.dark .text-gray-700 { color: #d1d5db !important; }
+html.dark .text-gray-600 { color: #9ca3af !important; }
+html.dark .text-gray-500 { color: #6b7280 !important; }
+html.dark .text-gray-400 { color: #4b5563 !important; }
+html.dark .text-gray-300 { color: #374151 !important; }
+html.dark .text-indigo-700 { color: #a5b4fc !important; }
+html.dark .text-indigo-600 { color: #c7d2fe !important; }
+html.dark .border-gray-100 { border-color: #1f2937 !important; }
+html.dark .border-gray-200 { border-color: #374151 !important; }
+html.dark .border-indigo-200 { border-color: #3730a3 !important; }
+html.dark .bg-gradient-to-r { background: #312e81 !important; }
+html.dark .bg-indigo-600 { background: #4338ca !important; }
+html.dark .bg-violet-600 { background: #5b21b6 !important; }
+html.dark table tbody tr:nth-child(even) { background: #1f2937 !important; }
+html.dark table tbody tr:hover { background: #312e81 !important; }
+html.dark input, html.dark select { background: #1f2937 !important; color: #f3f4f6 !important; border-color: #374151 !important; }
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%
+  }
+
+  .dark {
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%
+  }
+}
+
+
+
+img {
+  object-position: top;
+}
+
+.fixed {
+  position: fixed;
+}
