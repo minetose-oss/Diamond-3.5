@@ -437,7 +437,7 @@ type T5SubTab = "table"|"compare"|"tracker"|"profile";
 
 export default function App() {
   const [tab, setTab] = useState<Tab>("overview");
-  const [filter, setFilter] = useState<string>("feb");
+  const [filter, setFilter] = useState<string>("jul");
   const [regionFilter, setRegionFilter] = useState<string>("ทั้งหมด");
   const [t5SubTab, setT5SubTab] = useState<T5SubTab>("table");
   const [compareMode, setCompareMode] = useState<CompareMode>("mom");
