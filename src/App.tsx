@@ -337,7 +337,7 @@ const MONTHS = [
   { key:"nov25", label:"พฤศจิกายน 2568",  short:"พ.ย.",  range:"1–28 พ.ย. 2568",  year:2025 },
   { key:"dec25", label:"ธันวาคม 2568",    short:"ธ.ค.",  range:"1–30 ธ.ค. 2568",  year:2025 },
   { key:"jan",   label:"มกราคม 2569",     short:"ม.ค.",  range:"1–30 ม.ค. 2569",  year:2026 },
-  { key:"feb",   label:"กุมภาพันธ์ 2569", short:"ก.พ.",  range:"1–27 ก.พ. 2569",  year:2026 },
+  { key:"feb",   label:"กุมภาพันธ์ 2569", short:"ก.พ.",  range:"1–27 ก.ค. 2569",  year:2026 },
   { key:"mar",   label:"มีนาคม 2569",     short:"มี.ค.", range:"1–31 มี.ค. 2569",  year:2026 },
   { key:"apr",   label:"เมษายน 2569",     short:"เม.ย.", range:"1–30 เม.ย. 2569",  year:2026 },
   { key:"may",   label:"พฤษภาคม 2569",    short:"พ.ค.",  range:"1–31 พ.ค. 2569",  year:2026 },
@@ -751,7 +751,7 @@ export default function App() {
           <div>
             <div className="text-xs text-indigo-300 font-medium mb-0.5">Globlex Securities · #Wealth 4</div>
             <h1 className="text-xl font-bold">SUB/SWI High Fee Volume</h1>
-            <p className="text-indigo-200 text-sm mt-0.5">เม.ย. 2568 – ก.พ. 2569</p>
+            <p className="text-indigo-200 text-sm mt-0.5">เม.ย. 2568 – ก.ค. 2569</p>
           </div>
           <div className="text-right">
             <div className="text-xl font-bold">฿{fmt(grandTotal)}</div>
@@ -774,7 +774,7 @@ export default function App() {
           <KpiCard title="รวมปี 2568" value={`฿${fmt(MONTHS.filter(m=>m.year===2025).reduce((s,m)=>s+(monthTotals[m.key]||0),0))}`}
             sub="เม.ย.–ธ.ค. 2568" icon={Target} bg="bg-violet-500"/>
           <KpiCard title="รวมปี 2569" value={`฿${fmt(MONTHS.filter(m=>m.year===2026).reduce((s,m)=>s+(monthTotals[m.key]||0),0))}`}
-            sub="ม.ค.–ก.พ. 2569" icon={DollarSign} bg="bg-emerald-500"/>
+            sub="ม.ค.–ก.ค. 2569" icon={DollarSign} bg="bg-emerald-500"/>
           <KpiCard title="🏆 Top เดือนนี้" value={top10[0]?.code||"—"}
             sub={top10[0]?`฿${fmt(top10[0].vol)}`:"—"} icon={Award} bg="bg-amber-500"/>
         </div>
@@ -811,7 +811,7 @@ export default function App() {
         {tab==="overview" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <h2 className="text-sm font-semibold text-gray-700 mb-4">แนวโน้ม Volume รายเดือน (เม.ย. 2568 – ก.พ. 2569)</h2>
+              <h2 className="text-sm font-semibold text-gray-700 mb-4">แนวโน้ม Volume รายเดือน (เม.ย. 2568 – ก.ค. 2569)</h2>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={monthlyTrend}>                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
                   <XAxis dataKey="month" tick={{fontSize:11}}/>
@@ -1047,7 +1047,7 @@ export default function App() {
             {/* 4. TREND LINE */}
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
               <h2 className="text-sm font-semibold text-gray-700 mb-4">
-                📈 Trend Line — Top 5 Team 5 (เม.ย. 2568 – ก.พ. 2569)
+                📈 Trend Line — Top 5 Team 5 (เม.ย. 2568 – ก.ค. 2569)
               </h2>
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={trendData} margin={{left:10,right:20}}>
@@ -1565,7 +1565,7 @@ export default function App() {
 
                 <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-sm font-semibold text-gray-700">🚦 Traffic Light — Fee vs Target (ก.พ. 2569)</h2>
+                    <h2 className="text-sm font-semibold text-gray-700">🚦 Traffic Light — Fee vs Target (ก.ค. 2569)</h2>
                     <span className="text-xs text-gray-400">เรียงตาม % Target</span>
                   </div>
                   <div className="space-y-2">
@@ -1702,7 +1702,7 @@ export default function App() {
                             {label:"ยอดรวมทุกเดือน",    val:`฿${fmt(allTotal)}`,    sub:`Fee ฿${fmtFee(toFee(allTotal))}`},
                             {label:"เฉลี่ย/เดือน",      val:`฿${fmt(avgVol)}`,      sub:`Fee ฿${fmtFee(toFee(avgVol))}`},
                             {label:"เดือนที่ดีที่สุด", val:best.short,              sub:`฿${fmt(best.vol)}`},
-                            {label:"Fee ก.พ. 2569",     val:`฿${fmtFee(curFee)}`,   sub:targetPct!==null?`${targetPct.toFixed(1)}% of Target`:"ไม่มี Target"},
+                            {label:"Fee ก.ค. 2569",     val:`฿${fmtFee(curFee)}`,   sub:targetPct!==null?`${targetPct.toFixed(1)}% of Target`:"ไม่มี Target"},
                           ].map((k,i)=>(
                             <div key={i} className="bg-gray-50 rounded-xl p-3">
                               <div className="text-xs text-gray-400 mb-1">{k.label}</div>
@@ -1758,7 +1758,7 @@ export default function App() {
 
                       {info.target > 0 && (
                         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                          <h2 className="text-sm font-semibold text-gray-700 mb-4">🎯 Fee vs Target ก.พ. 2569</h2>
+                          <h2 className="text-sm font-semibold text-gray-700 mb-4">🎯 Fee vs Target ก.ค. 2569</h2>
                           <div className="relative h-8 bg-gray-100 rounded-full overflow-hidden">
                             <div className={`h-8 rounded-full flex items-center justify-end pr-3 ${
                               light==="green"?"bg-emerald-500":light==="yellow"?"bg-amber-400":"bg-red-500"
@@ -1993,7 +1993,7 @@ export default function App() {
         )}
 
         <div className="text-center text-xs text-gray-400 pb-4">
-          Globlex Securities Co., Ltd. · #Wealth 4 · เม.ย. 2568 – ก.พ. 2569
+          Globlex Securities Co., Ltd. · #Wealth 4 · เม.ย. 2568 – ก.ค. 2569
         </div>
       </div>
     </div>
