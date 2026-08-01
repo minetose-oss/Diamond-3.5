@@ -357,7 +357,7 @@ const MONTHS = [
   { key:"nov25", label:"พฤศจิกายน 2568",  short:"พ.ย.",  range:"1–28 พ.ย. 2568",  year:2025 },
   { key:"dec25", label:"ธันวาคม 2568",    short:"ธ.ค.",  range:"1–30 ธ.ค. 2568",  year:2025 },
   { key:"jan",   label:"มกราคม 2569",     short:"ม.ค.",  range:"1–30 ม.ค. 2569",  year:2026 },
-  { key:"feb",   label:"กุมภาพันธ์ 2569", short:"ก.พ.",  range:"1–27 ก.ค. 2569",  year:2026 },
+  { key:"feb",   label:"กุมภาพันธ์ 2569", short:"ก.พ.",  range:"1–27 ก.พ. 2569",  year:2026 },
   { key:"mar",   label:"มีนาคม 2569",     short:"มี.ค.", range:"1–31 มี.ค. 2569",  year:2026 },
   { key:"apr",   label:"เมษายน 2569",     short:"เม.ย.", range:"1–30 เม.ย. 2569",  year:2026 },
   { key:"may",   label:"พฤษภาคม 2569",    short:"พ.ค.",  range:"1–31 พ.ค. 2569",  year:2026 },
@@ -623,8 +623,8 @@ export default function App() {
   []);
 
   // ── Target Tracker data ──
-  // Use latest month (feb) as "current" for traffic light
-  const TRACKER_MONTH = "feb";
+  // Use selected month (filter) as "current" for traffic light
+  const TRACKER_MONTH = filter === "all25" || filter === "all26" ? "jul" : filter;
   const trackerData = useMemo(() => {
     return TEAM5_INFO.map(m => {
       // per-month vols for avg
