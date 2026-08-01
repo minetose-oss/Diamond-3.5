@@ -329,6 +329,12 @@ const TEAM5_INFO: Member[] = [
   { ic:"8538", code:"5_8538", name:"นิด",         province:"นครราชสีมา",   region:"อีสาน", salary:20_000, target:26_000 },
   // คนที่ไม่มีข้อมูล
   { ic:"A057", code:"5_A057", name:"พี่อ้อ",    province:"ชลบุรี",         region:"ตะวันออก", salary:0, target:0 },
+  // ── สมาชิกใหม่ (เพิ่มใหม่) ──
+  { ic:"8515", code:"5_8515", name:"น้องใหม่ 8515",  province:"อุดรธานี",     region:"อีสาน", salary:30_000, target:39_000 },
+  { ic:"8513", code:"5_8513", name:"น้องใหม่ 8513",  province:"ขอนแก่น",     region:"อีสาน", salary:30_000, target:39_000 },
+  { ic:"8493", code:"5_8493", name:"น้องใหม่ 8493",  province:"เชียงใหม่",   region:"เหนือ", salary:25_000, target:32_500 },
+  { ic:"8491", code:"5_8491", name:"น้องใหม่ 8491",  province:"—",            region:"—",   salary:0, target:0 },
+  { ic:"A078", code:"5_A078", name:"น้องใหม่ A078",  province:"—",            region:"—",   salary:0, target:0 },
 ];
 
 // map code -> member info
