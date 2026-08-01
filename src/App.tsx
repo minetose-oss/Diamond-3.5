@@ -644,7 +644,7 @@ export default function App() {
       const allTotal = monthVols.reduce((s,v)=>s+v,0);
       return { ...m, curVol, curFee, avgVol, avgFee, targetPct, light, allTotal, activeMonths: activeMonths.length };
     }).sort((a,b) => (b.targetPct||0) - (a.targetPct||0));
-  }, []);
+  }, [filter]);
 
   // ── Compare by selected months (ข้อ 3) ──
   const cmpData = useMemo(() => {
@@ -686,7 +686,7 @@ export default function App() {
       return { ...mo, rank: RAW[mo.key]?.[info.code]>0 ? rank : 0 };
     });
     return { info, monthVols, active, allTotal, avgVol, best, curVol, curFee, targetPct, monthRanks };
-  }, [profileCode]);
+  }, [profileCode, filter]);
 
   // ── Visual tab data ──
   // Trend line: top 5 team5 members across all months
@@ -1585,7 +1585,7 @@ export default function App() {
 
                 <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-sm font-semibold text-gray-700">🚦 Traffic Light — Fee vs Target (ก.ค. 2569)</h2>
+                    <h2 className="text-sm font-semibold text-gray-700">🚦 Traffic Light — Fee vs Target ({monthLabel?.label || "ก.ค. 2569"})</h2>
                     <span className="text-xs text-gray-400">เรียงตาม % Target</span>
                   </div>
                   <div className="space-y-2">
@@ -1722,7 +1722,7 @@ export default function App() {
                             {label:"ยอดรวมทุกเดือน",    val:`฿${fmt(allTotal)}`,    sub:`Fee ฿${fmtFee(toFee(allTotal))}`},
                             {label:"เฉลี่ย/เดือน",      val:`฿${fmt(avgVol)}`,      sub:`Fee ฿${fmtFee(toFee(avgVol))}`},
                             {label:"เดือนที่ดีที่สุด", val:best.short,              sub:`฿${fmt(best.vol)}`},
-                            {label:"Fee ก.ค. 2569",     val:`฿${fmtFee(curFee)}`,   sub:targetPct!==null?`${targetPct.toFixed(1)}% of Target`:"ไม่มี Target"},
+                            {label:`Fee ${monthLabel?.label || "ก.ค. 2569"}`,     val:`฿${fmtFee(curFee)}`,   sub:targetPct!==null?`${targetPct.toFixed(1)}% of Target`:"ไม่มี Target"},
                           ].map((k,i)=>(
                             <div key={i} className="bg-gray-50 rounded-xl p-3">
                               <div className="text-xs text-gray-400 mb-1">{k.label}</div>
@@ -1778,7 +1778,7 @@ export default function App() {
 
                       {info.target > 0 && (
                         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                          <h2 className="text-sm font-semibold text-gray-700 mb-4">🎯 Fee vs Target ก.ค. 2569</h2>
+                          <h2 className="text-sm font-semibold text-gray-700 mb-4">🎯 Fee vs Target {monthLabel?.label || "ก.ค. 2569"}</h2>
                           <div className="relative h-8 bg-gray-100 rounded-full overflow-hidden">
                             <div className={`h-8 rounded-full flex items-center justify-end pr-3 ${
                               light==="green"?"bg-emerald-500":light==="yellow"?"bg-amber-400":"bg-red-500"
