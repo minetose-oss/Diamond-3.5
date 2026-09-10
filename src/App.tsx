@@ -173,7 +173,7 @@ const RAW: Record<string, Record<string, number>> = {
     "7_A056":      45_000.00, "7_A069":      10_280.00, "5_A078":       2_000.00,
     "5_8635": 0, "7_A055": 0, "6_A054": 0, "7_A059": 0,
   },
-  // ── เดือนล่าสุด (เพิ่มใหม่ มี.ค.-ก.ค. 2569) ──
+  // ── เดือนล่าสุด (เพิ่มใหม่ มี.ค.-ส.ค. 2569) ──
   // มี.ค. 2569 (2026)
   mar: {
     "4_8649": 250_000_000, "1_8658": 180_000_000, "8660": 150_000_000,
@@ -260,7 +260,7 @@ const RAW: Record<string, Record<string, number>> = {
     "6_A054": 0, "5_8635": 0, "5_8513": 0, "A077": 0, "A012": 0,
     "5_A078": 0,
   },
-  // ก.ค. 2569 (2026) — Wise Input: 720,837,306.38 / 25,212 ct / $28.59/ct
+  // ส.ค. 2569 (2026) — Wise Input: 720,837,306.38 / 25,212 ct / $28.59/ct
   jul: {
     "4_8649": 158617189.63, "7_8616": 73950000.00, "1_8658": 46447284.71,
     "2_8653": 32658720.15, "2_8654": 31086630.04, "5_8637": 29434079.54,
@@ -287,6 +287,37 @@ const RAW: Record<string, Record<string, number>> = {
     "5_8585": 0, "5_8634": 0, "8_8624": 0, "7_A001": 0, "7_A059": 0,
     "6_A054": 0, "5_8635": 0, "5_A078": 0, "A077": 0, "9_8498": 0,
     "5_8491": 0, "A012": 0,
+  },
+  // ส.ค. 2569 (2026) — Wise Input: 1,068,358,749.83 / 37,461 ct / $28.59/ct
+  aug: {
+    "4_8649": 150753907.82, "1_8658": 101524563.82, "2_8654": 84539119.96,
+    "7_8616": 65087719.01, "5_8637": 40740002.08, "2_8653": 39784394.13,
+    "9_8848": 15901306.23, "1_8542": 10734568.16, "5_8630": 26783335.12,
+    "4_8506": 25213053.21, "8_8570": 22644555.65, "4_8611": 21103960.59,
+    "6_8620": 19574147.21, "6_8576": 19291287.92, "5_8631": 18000010.70,
+    "5_8628": 17359459.79, "4_8500": 14768000.00, "1_8656": 13839841.13,
+    "5_8656": 12830000.00, "6_8523": 11580500.00, "5_8638": 11500000.00,
+    "2_8619": 11260965.57, "5_8566": 10631418.83, "1_8647": 10547133.90,
+    "3_8621": 9998761.78, "5_8644": 9849360.03, "5_8493": 9600728.37,
+    "6_8622": 9366048.91, "1_8508": 9270000.00, "10_8652": 8925288.95,
+    "5_8585": 8720000.00, "5_8546": 8800000.00, "2_8553": 8361298.54,
+    "4_8485": 8155506.64, "2_8617": 7281651.99, "5_8643": 7231000.00,
+    "4_8577": 7150421.91, "2_8496": 7100000.00, "4_8483": 7002567.01,
+    "6_A081": 6900000.00, "5_8513": 6900000.00, "5_8632": 6519779.13,
+    "5_8590": 5951078.88, "5_8640": 5430000.00, "6_8523": 4962664.63,
+    "5_8629": 4705588.98, "5_8567": 4589363.75, "1_8589": 4450000.00,
+    "5_8515": 4100000.00, "5_8639": 4000705.40, "5_8562": 4000000.00,
+    "9_8498": 4000000.00, "9_8479": 4000000.00, "7_8530": 3559025.34,
+    "5_8633": 3277496.16, "6_8490": 3200000.00, "9_8499": 3050000.00,
+    "5_8645": 3024130.11, "5_8636": 3004800.67, "1_8492": 2960000.00,
+    "8_8514": 2829108.38, "1_8507": 2656000.00, "4_8612": 2019240.86,
+    "5_8635": 2000000.00, "6_8534": 1887129.35, "7_8537": 1506500.14,
+    "8_8624": 1500000.00, "5_8631": 1101049.76, "4_8525": 1055748.71,
+    "5_8634": 1000000.00, "4_8525": 757266.33, "5_A057": 750000.00,
+    "9_8497": 700000.00, "2_A087": 400000.00, "7_A056": 312000.00,
+    "7_A001": 110000.00, "10_8484": 70500.00, "8660": 18562.09,
+    "2_A089": 36500.00, "A077": 0, "A012": 0, "2_A039": 0, "6_A054": 0,
+    "5_A078": 0, "5_8610": 0,
   },
 };
 
@@ -367,7 +398,8 @@ const MONTHS = [
   { key:"apr",   label:"เมษายน 2569",     short:"เม.ย.", range:"1–30 เม.ย. 2569",  year:2026 },
   { key:"may",   label:"พฤษภาคม 2569",    short:"พ.ค.",  range:"1–31 พ.ค. 2569",  year:2026 },
   { key:"jun",   label:"มิถุนายน 2569",   short:"มิ.ย.", range:"1–30 มิ.ย. 2569",  year:2026 },
-  { key:"jul",   label:"กรกฎาคม 2569",    short:"ก.ค.",  range:"1–31 ก.ค. 2569",  year:2026 },
+  { key:"jul",   label:"กรกฎาคม 2569",    short:"ก.ค.",  range:"1–31 ส.ค. 2569",  year:2026 },
+  { key:"aug",   label:"สิงหาคม 2569",    short:"ส.ค.",  range:"1–31 ส.ค. 2569",  year:2026 },
 ];
 
 const TEAM_COLORS: Record<string, string> = {
@@ -442,7 +474,7 @@ type T5SubTab = "table"|"compare"|"tracker"|"profile";
 
 export default function App() {
   const [tab, setTab] = useState<Tab>("overview");
-  const [filter, setFilter] = useState<string>("jul");
+  const [filter, setFilter] = useState<string>("aug");
   const [regionFilter, setRegionFilter] = useState<string>("ทั้งหมด");
   const [t5SubTab, setT5SubTab] = useState<T5SubTab>("table");
   const [compareMode, setCompareMode] = useState<CompareMode>("mom");
@@ -776,7 +808,7 @@ export default function App() {
           <div>
             <div className="text-xs text-indigo-300 font-medium mb-0.5">Globlex Securities · #Wealth 4</div>
             <h1 className="text-xl font-bold">SUB/SWI High Fee Volume</h1>
-            <p className="text-indigo-200 text-sm mt-0.5">เม.ย. 2568 – ก.ค. 2569</p>
+            <p className="text-indigo-200 text-sm mt-0.5">เม.ย. 2568 – ส.ค. 2569</p>
           </div>
           <div className="text-right">
             <div className="text-xl font-bold">฿{fmt(grandTotal)}</div>
@@ -799,7 +831,7 @@ export default function App() {
           <KpiCard title="รวมปี 2568" value={`฿${fmt(MONTHS.filter(m=>m.year===2025).reduce((s,m)=>s+(monthTotals[m.key]||0),0))}`}
             sub="เม.ย.–ธ.ค. 2568" icon={Target} bg="bg-violet-500"/>
           <KpiCard title="รวมปี 2569" value={`฿${fmt(MONTHS.filter(m=>m.year===2026).reduce((s,m)=>s+(monthTotals[m.key]||0),0))}`}
-            sub="ม.ค.–ก.ค. 2569" icon={DollarSign} bg="bg-emerald-500"/>
+            sub="ม.ค.–ส.ค. 2569" icon={DollarSign} bg="bg-emerald-500"/>
           <KpiCard title="🏆 Top เดือนนี้" value={top10[0]?.code||"—"}
             sub={top10[0]?`฿${fmt(top10[0].vol)}`:"—"} icon={Award} bg="bg-amber-500"/>
         </div>
@@ -836,7 +868,7 @@ export default function App() {
         {tab==="overview" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <h2 className="text-sm font-semibold text-gray-700 mb-4">แนวโน้ม Volume รายเดือน (เม.ย. 2568 – ก.ค. 2569)</h2>
+              <h2 className="text-sm font-semibold text-gray-700 mb-4">แนวโน้ม Volume รายเดือน (เม.ย. 2568 – ส.ค. 2569)</h2>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={monthlyTrend}>                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
                   <XAxis dataKey="month" tick={{fontSize:11}}/>
@@ -1072,7 +1104,7 @@ export default function App() {
             {/* 4. TREND LINE */}
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
               <h2 className="text-sm font-semibold text-gray-700 mb-4">
-                📈 Trend Line — Top 5 Team 5 (เม.ย. 2568 – ก.ค. 2569)
+                📈 Trend Line — Top 5 Team 5 (เม.ย. 2568 – ส.ค. 2569)
               </h2>
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={trendData} margin={{left:10,right:20}}>
@@ -1590,7 +1622,7 @@ export default function App() {
 
                 <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-sm font-semibold text-gray-700">🚦 Traffic Light — Fee vs Target ({monthLabel?.label || "ก.ค. 2569"})</h2>
+                    <h2 className="text-sm font-semibold text-gray-700">🚦 Traffic Light — Fee vs Target ({monthLabel?.label || "ส.ค. 2569"})</h2>
                     <span className="text-xs text-gray-400">เรียงตาม % Target</span>
                   </div>
                   <div className="space-y-2">
@@ -1727,7 +1759,7 @@ export default function App() {
                             {label:"ยอดรวมทุกเดือน",    val:`฿${fmt(allTotal)}`,    sub:`Fee ฿${fmtFee(toFee(allTotal))}`},
                             {label:"เฉลี่ย/เดือน",      val:`฿${fmt(avgVol)}`,      sub:`Fee ฿${fmtFee(toFee(avgVol))}`},
                             {label:"เดือนที่ดีที่สุด", val:best.short,              sub:`฿${fmt(best.vol)}`},
-                            {label:`Fee ${monthLabel?.label || "ก.ค. 2569"}`,     val:`฿${fmtFee(curFee)}`,   sub:targetPct!==null?`${targetPct.toFixed(1)}% of Target`:(curFee>0?`฿${fmtFee(curFee)} ได้รับแล้ว`:"ไม่มี Target")},
+                            {label:`Fee ${monthLabel?.label || "ส.ค. 2569"}`,     val:`฿${fmtFee(curFee)}`,   sub:targetPct!==null?`${targetPct.toFixed(1)}% of Target`:(curFee>0?`฿${fmtFee(curFee)} ได้รับแล้ว`:"ไม่มี Target")},
                           ].map((k,i)=>(
                             <div key={i} className="bg-gray-50 rounded-xl p-3">
                               <div className="text-xs text-gray-400 mb-1">{k.label}</div>
@@ -1783,7 +1815,7 @@ export default function App() {
 
                       {info.target > 0 && (
                         <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                          <h2 className="text-sm font-semibold text-gray-700 mb-4">🎯 Fee vs Target {monthLabel?.label || "ก.ค. 2569"}</h2>
+                          <h2 className="text-sm font-semibold text-gray-700 mb-4">🎯 Fee vs Target {monthLabel?.label || "ส.ค. 2569"}</h2>
                           <div className="relative h-8 bg-gray-100 rounded-full overflow-hidden">
                             <div className={`h-8 rounded-full flex items-center justify-end pr-3 ${
                               light==="green"?"bg-emerald-500":light==="yellow"?"bg-amber-400":"bg-red-500"
@@ -2018,7 +2050,7 @@ export default function App() {
         )}
 
         <div className="text-center text-xs text-gray-400 pb-4">
-          Globlex Securities Co., Ltd. · #Wealth 4 · เม.ย. 2568 – ก.ค. 2569
+          Globlex Securities Co., Ltd. · #Wealth 4 · เม.ย. 2568 – ส.ค. 2569
         </div>
       </div>
     </div>
