@@ -5,7 +5,7 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
   LineChart, Line, Treemap,
 } from "recharts";
-import { TrendingUp, TrendingDown, DollarSign, Target, Award, MapPin, Users, BarChart2, Trophy } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, Target, Award, MapPin, Users, BarChart2, Trophy, Search, Download, RefreshCw, Heart, Calendar, Sparkles, Eye, Layers, Activity } from "lucide-react";
 
 // ─── RAW VOLUME DATA ─────────────────────────────────────────────────────────
 
@@ -459,6 +459,16 @@ function fmtFee(v: number) {
   return v > 0 ? v.toFixed(0) : "0";
 }
 
+const USD_RATE = 28.593; // จาก 25624.jpg: USD/CT = $28.59
+function fmtUSD(v: number) {
+  // แปลง THB Volume เป็น USD ผ่าน CT/USD rate (approximation)
+  const ct = v / USD_RATE;
+  const usd = ct * 28.59; // $28.59/CT
+  if (usd >= 1e6) return `${(usd/1e6).toFixed(2)}M`;
+  if (usd >= 1e3) return `${(usd/1e3).toFixed(1)}K`;
+  return usd > 0 ? usd.toLocaleString() : "0";
+}
+
 function computeTeams(data: Record<string, number>) {
   const acc: Record<string, number> = {};
   for (const [code, vol] of Object.entries(data)) {
@@ -499,7 +509,7 @@ function KpiCard({ title, value, sub, icon: Icon, bg, diff }: {
   );
 }
 
-type Tab = "overview"|"visual"|"team"|"team5";
+type Tab = "overview"|"visual"|"team"|"team5"|"calendar"|"goals"|"members";
 type CompareMode = "mom"|"qoq"|"hoh"|"yoy";
 type T5SubTab = "table"|"compare"|"tracker"|"profile";
 
@@ -545,6 +555,31 @@ export default function App() {
   });
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false); // mobile
+
+  // New features state
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("ui-favorites");
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+  const [currency, setCurrency] = useState<"THB"|"USD"|"CT">(() => {
+    try {
+      const saved = localStorage.getItem("ui-currency");
+      if (saved === "THB" || saved === "USD" || saved === "CT") return saved;
+    } catch {}
+    return "THB";
+  });
+  const [refreshKey, setRefreshKey] = useState<number>(0);
+
+  // Persist favorites + currency
+  useEffect(() => {
+    try { localStorage.setItem("ui-favorites", JSON.stringify(favorites)); } catch {}
+  }, [favorites]);
+  useEffect(() => {
+    try { localStorage.setItem("ui-currency", currency); } catch {}
+  }, [currency]);
 
   // Apply dark mode to html + persist
   useEffect(() => {
@@ -676,6 +711,43 @@ export default function App() {
       return { ...m, vol, byMonth };
     });
   }, [selectedVolByCode]);
+
+  // Filtered members by search query
+  const filteredMembers = useMemo(() => {
+    if (!searchQuery.trim()) return TEAM5_INFO;
+    const q = searchQuery.toLowerCase();
+    return TEAM5_INFO.filter(m =>
+      m.name.toLowerCase().includes(q) ||
+      m.code.toLowerCase().includes(q) ||
+      m.province.toLowerCase().includes(q) ||
+      m.region.toLowerCase().includes(q)
+    );
+  }, [searchQuery]);
+
+  // Export to CSV
+  const exportCSV = () => {
+    const rows: string[][] = [];
+    rows.push(["IC", "ชื่อ", "จังหวัด", "ภาค", ...MONTHS.map(m => m.label), "Total"]);
+    TEAM5_INFO.forEach(m => {
+      const cells = [m.code, m.name, m.province, m.region];
+      let total = 0;
+      MONTHS.forEach(mo => {
+        const v = RAW[mo.key]?.[m.code] || 0;
+        cells.push(v.toString());
+        total += v;
+      });
+      cells.push(total.toString());
+      rows.push(cells);
+    });
+    const csv = rows.map(r => r.map(c => `"${c}"`).join(",")).join("\n");
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `diamond-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   // jan/feb specific for comparison columns in team5 table
   const getMonthVol = (m: typeof team5Data[0], mk: string) => m.byMonth[mk]||0;
@@ -913,6 +985,9 @@ export default function App() {
     {key:"visual",    label:"✨ Visual"},
     {key:"team",      label:"👥 รายทีม"},
     {key:"team5",     label:"🟢 Team 5"},
+    {key:"calendar",  label:"📅 Calendar"},
+    {key:"goals",     label:"🎯 Goals"},
+    {key:"members",   label:"👤 Members"},
   ];
 
   const FILTER_GROUPS = [
@@ -961,12 +1036,23 @@ export default function App() {
               <div className="text-[10px] uppercase tracking-wider text-white/70 font-bold mb-1">
                 {monthLabel ? monthLabel.label : filter==="all25"?"รวมปี 2568":"รวมปี 2569"}
               </div>
-              <div className="text-3xl font-bold tracking-tight number-pulse">฿{fmt(grandTotal)}</div>
-              <div className="text-white/80 text-xs mt-1">ยอดรวม Volume</div>
+              <div className="text-3xl font-bold tracking-tight number-pulse">
+                {currency === "USD" ? `$${fmtUSD(grandTotal)}` : currency === "CT" ? `${totalCarats.toLocaleString()} ct` : `฿${fmt(grandTotal)}`}
+              </div>
+              <div className="text-white/80 text-xs mt-1">
+                {currency === "USD" ? "ยอดรวม USD" : currency === "CT" ? "ยอดรวม Carats" : "ยอดรวม Volume"}
+              </div>
             </div>
-            <button onClick={() => setShowSettings(!showSettings)}
-              className="w-10 h-10 rounded-xl bg-white/15 hover:bg-white/25 backdrop-blur transition-all flex items-center justify-center text-white border border-white/20"
-              title="Settings">
+            <button onClick={() => setRefreshKey(k => k + 1)} title="Refresh"
+              className="w-10 h-10 rounded-xl bg-white/15 hover:bg-white/25 backdrop-blur transition-all flex items-center justify-center text-white border border-white/20">
+              <RefreshCw size={16} className={refreshKey > 0 ? "animate-spin" : ""}/>
+            </button>
+            <button onClick={exportCSV} title="Export CSV"
+              className="w-10 h-10 rounded-xl bg-white/15 hover:bg-white/25 backdrop-blur transition-all flex items-center justify-center text-white border border-white/20">
+              <Download size={16}/>
+            </button>
+            <button onClick={() => setShowSettings(!showSettings)} title="Settings"
+              className="w-10 h-10 rounded-xl bg-white/15 hover:bg-white/25 backdrop-blur transition-all flex items-center justify-center text-white border border-white/20">
               <Settings size={18} className={showSettings ? "rotate-90 transition-transform" : "transition-transform"} />
             </button>
           </div>
@@ -1002,6 +1088,21 @@ export default function App() {
                   <div className={`w-4 h-4 rounded-full bg-white shadow transition-transform ${darkMode ? "translate-x-5" : ""}`}></div>
                 </div>
               </button>
+            </div>
+
+            {/* Currency toggle */}
+            <div>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 block">💱 สกุลเงิน</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(["THB", "USD", "CT"] as const).map(c => (
+                  <button key={c} onClick={() => setCurrency(c)}
+                    className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                      currency === c ? `bg-gradient-to-r ${t.gradient} text-white shadow-md` : "bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300"
+                    }`}>
+                    {c === "THB" ? "฿ THB" : c === "USD" ? "$ USD" : "💎 CT"}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Theme picker */}
@@ -2467,6 +2568,198 @@ export default function App() {
         <div className="text-center text-xs text-gray-400 pb-4">
           Globlex Securities Co., Ltd. · #Wealth 4 · เม.ย. 2568 – ก.ย. 2569
         </div>
+
+        {/* ══ CALENDAR HEATMAP ══ */}
+        {tab==="calendar" && (
+          <div className="space-y-5">
+            <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
+              <h2 className="section-title text-sm font-bold text-gray-800 mb-4">🔥 Calendar Heatmap — Volume รายเดือน</h2>
+              <div className="overflow-x-auto">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-8 gap-2 min-w-[600px]">
+                  {monthlyTrend.map((m, i) => {
+                    const max = Math.max(...monthlyTrend.map(x => x.volume));
+                    const intensity = max > 0 ? m.volume / max : 0;
+                    const alpha = Math.max(0.1, intensity);
+                    return (
+                      <div key={i} className="rounded-xl p-3 text-center transition-all hover:scale-105 cursor-pointer"
+                        style={{
+                          backgroundColor: `rgba(99,102,241,${alpha})`,
+                          color: intensity > 0.5 ? "white" : intensity > 0.2 ? "#312e81" : "#9ca3af",
+                        }}>
+                        <div className="text-[10px] uppercase font-bold opacity-80">{m.year === 2025 ? "2568" : "2569"}</div>
+                        <div className="text-sm font-bold mt-0.5">{m.month}</div>
+                        <div className="text-xs mt-1 font-mono">฿{m.volume >= 1e9 ? `${(m.volume/1e9).toFixed(2)}B` : m.volume >= 1e6 ? `${(m.volume/1e6).toFixed(1)}M` : fmt(m.volume)}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="flex items-center justify-center gap-3 mt-5 text-xs text-gray-500">
+                <span>น้อย</span>
+                {[0.1, 0.3, 0.5, 0.7, 1].map((v, i) => (
+                  <div key={i} className="w-8 h-3 rounded" style={{backgroundColor: `rgba(99,102,241,${v})`}}></div>
+                ))}
+                <span>มาก</span>
+              </div>
+            </div>
+
+            <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
+              <h2 className="section-title text-sm font-bold text-gray-800 mb-4">📊 Monthly Growth (MoM %)</h2>
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={monthlyTrend.map((m, i, arr) => ({
+                  month: m.month,
+                  growth: i > 0 ? ((m.volume - arr[i-1].volume) / Math.max(arr[i-1].volume, 1)) * 100 : 0,
+                }))}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
+                  <XAxis dataKey="month" tick={{fontSize:11}}/>
+                  <YAxis tick={{fontSize:10}} tickFormatter={(v) => `${v.toFixed(0)}%`}/>
+                  <Tooltip formatter={(v:number) => `${v.toFixed(1)}%`}/>
+                  <Bar dataKey="growth" radius={[6,6,0,0]}>
+                    {monthlyTrend.map((_, i) => (
+                      <Cell key={i} fill={i === 0 ? "#9ca3af" : (monthlyTrend[i].volume >= monthlyTrend[i-1].volume ? "#10b981" : "#ef4444")} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+              <div className="flex justify-center gap-4 mt-3 text-xs text-gray-500">
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"/>เติบโต</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-red-500 inline-block"/>ลดลง</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══ GOALS ══ */}
+        {tab==="goals" && (
+          <div className="space-y-5">
+            <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
+              <h2 className="section-title text-sm font-bold text-gray-800 mb-4">🎯 Team 5 Target Tracker — {monthLabel?.label || "ทุกเดือน"}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {trackerData.filter(t => t.target > 0).sort((a,b) => (b.targetPct||0) - (a.targetPct||0)).map((m, i) => {
+                  const pct = m.targetPct || 0;
+                  const color = pct >= 100 ? "from-emerald-500 to-teal-600" : pct >= 70 ? "from-amber-400 to-orange-500" : "from-rose-500 to-pink-600";
+                  return (
+                    <div key={m.code} className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 border border-gray-100">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-bold text-gray-800">{m.code}</span>
+                          <span className="text-sm font-semibold text-gray-700">{m.name}</span>
+                          {favorites.includes(m.code) && <Heart size={12} className="fill-rose-500 text-rose-500"/>}
+                        </div>
+                        <span className="text-xs font-bold text-gray-600">{pct.toFixed(1)}%</span>
+                      </div>
+                      <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div className={`h-full bg-gradient-to-r ${color} rounded-full transition-all duration-700`} style={{width: `${Math.min(100, pct)}%`}}></div>
+                      </div>
+                      <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+                        <span>฿{fmt(m.curFee)} / ฿{fmt(m.target)}</span>
+                        <span className={pct >= 100 ? "text-emerald-600 font-bold" : pct >= 70 ? "text-amber-600 font-bold" : "text-rose-600 font-bold"}>
+                          {pct >= 100 ? "🟢 On Target" : pct >= 70 ? "🟡 ใกล้ถึง" : "🔴 ต้องเร่ง"}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
+              <h2 className="section-title text-sm font-bold text-gray-800 mb-4">💡 AI Insight — สรุปอัตโนมัติ</h2>
+              <div className="space-y-3">
+                <div className="bg-gradient-to-br from-indigo-50 to-violet-50 rounded-xl p-4 border border-indigo-100">
+                  <div className="flex items-start gap-3">
+                    <Sparkles size={18} className="text-indigo-600 mt-0.5 shrink-0"/>
+                    <div className="text-sm text-gray-700">
+                      <strong>Top Performer:</strong> {top10[0]?.code} ทำยอด ฿{fmt(top10[0]?.vol || 0)} ในช่วงนี้
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-4 border border-emerald-100">
+                  <div className="flex items-start gap-3">
+                    <Activity size={18} className="text-emerald-600 mt-0.5 shrink-0"/>
+                    <div className="text-sm text-gray-700">
+                      <strong>Active ICs:</strong> มี {activeICs} ICs ที่มียอดขายในช่วงนี้ (คิดเป็น {Math.round((activeICs/Object.keys(RAW.sep || {}).length)*100)}% ของทั้งหมด)
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-100">
+                  <div className="flex items-start gap-3">
+                    <TrendingUp size={18} className="text-amber-600 mt-0.5 shrink-0"/>
+                    <div className="text-sm text-gray-700">
+                      <strong>Best Month:</strong> {bestMonth.label} ทำยอดสูงสุดในรอบ 16 เดือน (฿{fmt(bestMonth.vol)})
+                    </div>
+                  </div>
+                </div>
+                {yoyPct !== null && (
+                  <div className={`bg-gradient-to-br ${yoyPct > 0 ? "from-emerald-50 to-teal-50" : "from-rose-50 to-pink-50"} rounded-xl p-4 border ${yoyPct > 0 ? "border-emerald-100" : "border-rose-100"}`}>
+                    <div className="flex items-start gap-3">
+                      {yoyPct > 0 ? <TrendingUp size={18} className="text-emerald-600 mt-0.5 shrink-0"/> : <TrendingDown size={18} className="text-rose-600 mt-0.5 shrink-0"/>}
+                      <div className="text-sm text-gray-700">
+                        <strong>YoY:</strong> เดือนนี้{yoyPct > 0 ? "เติบโต" : "ลดลง"} {Math.abs(yoyPct).toFixed(1)}% เทียบกับเดือนเดียวกันปีก่อน
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══ MEMBERS ══ */}
+        {tab==="members" && (
+          <div className="space-y-5">
+            <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
+              <div className="flex items-center gap-3 mb-4">
+                <h2 className="section-title text-sm font-bold text-gray-800 flex-1">👤 All Members ({searchQuery ? `${filteredMembers.length}/${TEAM5_INFO.length}` : TEAM5_INFO.length})</h2>
+                <div className="relative">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
+                  <input type="text" placeholder="ค้นหา ชื่อ/รหัส..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                    className="pl-9 pr-3 py-1.5 rounded-full border border-gray-200 text-xs focus:outline-none focus:border-indigo-400 w-44"/>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {filteredMembers.map(m => {
+                  const total = MONTHS.reduce((s,mo)=>s+(RAW[mo.key]?.[m.code]||0),0);
+                  const cur = RAW[filter]?.[m.code] || 0;
+                  const isFav = favorites.includes(m.code);
+                  return (
+                    <div key={m.code} className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 border border-gray-100 hover:shadow-md transition-all">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-sm font-bold text-gray-800">{m.code}</span>
+                            <span className="font-semibold text-gray-700">{m.name}</span>
+                          </div>
+                          <div className="text-xs text-gray-400 mt-0.5">{m.province} · {m.region}</div>
+                        </div>
+                        <button onClick={() => setFavorites(isFav ? favorites.filter(c => c !== m.code) : [...favorites, m.code])}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-rose-50 transition-all">
+                          <Heart size={14} className={isFav ? "fill-rose-500 text-rose-500" : "text-gray-300"}/>
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
+                        <div>
+                          <div className="text-gray-400">รวม 16 เดือน</div>
+                          <div className="font-bold text-gray-800">฿{fmt(total)}</div>
+                        </div>
+                        <div>
+                          <div className="text-gray-400">{monthLabel?.short || "—"}</div>
+                          <div className="font-bold text-indigo-600">฿{fmt(cur)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {filteredMembers.length === 0 && (
+                <div className="text-center py-8 text-gray-400">
+                  <Search size={32} className="mx-auto mb-2 opacity-50"/>
+                  <div className="text-sm">ไม่พบ "{searchQuery}"</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         </div>{/* close flex-1 */}
       </div>{/* close max-w-7xl / md:flex */}
     </div>
