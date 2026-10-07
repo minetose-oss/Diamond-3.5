@@ -220,3 +220,109 @@ body {
   box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
   padding: 8px 12px !important;
 }
+
+/* ── Theme: Rose ── */
+.bg-rose-hero {
+  background: linear-gradient(135deg, #881337 0%, #be123c 25%, #db2777 50%, #e11d48 75%, #881337 100%);
+  background-size: 200% 200%;
+  animation: gradient-shift 12s ease infinite;
+}
+
+/* ── Theme: Emerald ── */
+.bg-emerald-hero {
+  background: linear-gradient(135deg, #064e3b 0%, #047857 25%, #0d9488 50%, #059669 75%, #064e3b 100%);
+  background-size: 200% 200%;
+  animation: gradient-shift 12s ease infinite;
+}
+
+/* ── Theme: Gold ── */
+.bg-gold-hero {
+  background: linear-gradient(135deg, #78350f 0%, #b45309 25%, #d97706 50%, #f59e0b 75%, #78350f 100%);
+  background-size: 200% 200%;
+  animation: gradient-shift 12s ease infinite;
+}
+
+/* ── Stagger animation ── */
+@keyframes stagger-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.stagger > * { animation: stagger-fade-up 0.4s ease-out backwards; }
+.stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger > *:nth-child(2) { animation-delay: 0.10s; }
+.stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger > *:nth-child(4) { animation-delay: 0.20s; }
+.stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger > *:nth-child(6) { animation-delay: 0.30s; }
+.stagger > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger > *:nth-child(8) { animation-delay: 0.40s; }
+.stagger > *:nth-child(9) { animation-delay: 0.45s; }
+.stagger > *:nth-child(10) { animation-delay: 0.50s; }
+
+/* ── Pulse glow ── */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(99,102,241,0.3); }
+  50% { box-shadow: 0 0 35px rgba(99,102,241,0.6); }
+}
+.pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+
+/* ── Slide in right ── */
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.slide-in-right { animation: slide-in-right 0.3s cubic-bezier(0.4,0,0.2,1); }
+
+/* ── Scale pop ── */
+@keyframes scale-pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.scale-pop { animation: scale-pop 0.3s ease-out; }
+
+/* ── Skeleton loading shimmer ── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 50%, #f3f4f6 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ── Hover tilt effect ── */
+.tilt-hover { transition: transform 0.3s ease; }
+.tilt-hover:hover { transform: perspective(1000px) rotateY(2deg) rotateX(-2deg) scale(1.02); }
+
+/* ── Gradient text ── */
+.gradient-text {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ── Number ticker ── */
+@keyframes number-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.number-pulse { animation: number-pulse 0.3s ease; }
+
+/* ── Dark mode refinements ── */
+.dark .bg-white { background-color: #1e293b !important; }
+.dark .bg-white\/80 { background-color: rgba(30, 41, 59, 0.85) !important; }
+.dark .text-gray-700 { color: #e2e8f0 !important; }
+.dark .text-gray-800 { color: #f1f5f9 !important; }
+.dark .text-gray-600 { color: #cbd5e1 !important; }
+.dark .text-gray-500 { color: #94a3b8 !important; }
+.dark .text-gray-400 { color: #64748b !important; }
+.dark .border-gray-100\/80 { border-color: rgba(51, 65, 85, 0.6) !important; }
+.dark .bg-gray-100 { background-color: #334155 !important; }
+.dark .bg-gray-200 { background-color: #475569 !important; }
+.dark .hover\:bg-gray-200:hover { background-color: #475569 !important; }
+.dark .bg-gray-50 { background-color: #0f172a !important; }
+.dark .shimmer { background: linear-gradient(90deg, #1e293b 0%, #334155 50%, #1e293b 100%); background-size: 200% 100%; }

@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { Settings, Moon, Sun, Palette, X, Check } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
@@ -504,6 +505,15 @@ type T5SubTab = "table"|"compare"|"tracker"|"profile";
 
 // ─── APP ─────────────────────────────────────────────────────────────────────
 
+// Theme definitions
+type Theme = "indigo" | "rose" | "emerald" | "gold";
+const THEMES: Record<Theme, {name: string; gradient: string; hero: string; light: string; icon: string; text: string; bg: string}> = {
+  indigo:  { name:"Indigo",  gradient:"from-indigo-600 to-violet-600", hero:"bg-diamond-hero",     light:"from-slate-50 via-indigo-50/30 to-violet-50/40", icon:"#6366f1", text:"#6366f1", bg:"bg-indigo-500" },
+  rose:    { name:"Rose",    gradient:"from-rose-500 to-pink-600",   hero:"bg-rose-hero",         light:"from-rose-50 via-pink-50/30 to-fuchsia-50/40", icon:"#f43f5e", text:"#f43f5e", bg:"bg-rose-500" },
+  emerald: { name:"Emerald", gradient:"from-emerald-500 to-teal-600", hero:"bg-emerald-hero",     light:"from-emerald-50 via-teal-50/30 to-cyan-50/40", icon:"#10b981", text:"#10b981", bg:"bg-emerald-500" },
+  gold:    { name:"Gold",    gradient:"from-amber-500 to-orange-600", hero:"bg-gold-hero",        light:"from-amber-50 via-yellow-50/30 to-orange-50/40", icon:"#f59e0b", text:"#f59e0b", bg:"bg-amber-500" },
+};
+
 export default function App() {
   const [tab, setTab] = useState<Tab>("overview");
   const [filter, setFilter] = useState<string>("sep");
@@ -515,6 +525,19 @@ export default function App() {
   const [cmpMonths, setCmpMonths] = useState<string[]>(["jan","feb"]);
   // profile page
   const [profileCode, setProfileCode] = useState<string>("");
+  // UI preferences
+  const [darkMode, setDarkMode] = useState<boolean>(false);
+  const [theme, setTheme] = useState<Theme>("indigo");
+  const [showSettings, setShowSettings] = useState<boolean>(false);
+
+  // Apply dark mode to html
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
 
   // monthly totals
   const monthTotals = useMemo(() =>
@@ -832,42 +855,115 @@ export default function App() {
     return mp;
   },[janRanked,febRanked]);
 
+  const t = THEMES[theme];
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-violet-50/40 font-sans">
+    <div className={`min-h-screen bg-gradient-to-br ${t.light} font-sans`}>
       {/* Header */}
-      <div className="bg-diamond-hero sparkle-bg text-white px-6 py-7 shadow-xl">
-        <div className="max-w-7xl mx-auto flex flex-wrap gap-4 items-center justify-between">
+      <div className={`${t.hero} sparkle-bg text-white px-6 py-7 shadow-xl relative overflow-hidden`}>
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="max-w-7xl mx-auto flex flex-wrap gap-4 items-center justify-between relative">
           <div className="flex items-center gap-4">
-            <div className="diamond-icon w-12 h-12 shadow-lg"></div>
+            <div className="diamond-icon w-12 h-12 shadow-lg pulse-glow"></div>
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] uppercase tracking-widest text-indigo-200 font-bold">Globlex Securities · #Wealth 4</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-400/30">● LIVE</span>
+                <span className="text-[10px] uppercase tracking-widest text-white/70 font-bold">Globlex Securities · #Wealth 4</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/30 text-emerald-200 font-semibold border border-emerald-400/40 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse"></span> LIVE
+                </span>
               </div>
               <h1 className="text-2xl font-bold tracking-tight">SUB/SWI High Fee Volume</h1>
-              <p className="text-indigo-200 text-sm mt-1">💎 เม.ย. 2568 – ก.ย. 2569 · 16 เดือน</p>
+              <p className="text-white/80 text-sm mt-1">💎 เม.ย. 2568 – ก.ย. 2569 · 16 เดือน</p>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-[10px] uppercase tracking-wider text-indigo-300 font-bold mb-1">
-              {monthLabel ? monthLabel.label : filter==="all25"?"รวมปี 2568":"รวมปี 2569"}
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <div className="text-[10px] uppercase tracking-wider text-white/70 font-bold mb-1">
+                {monthLabel ? monthLabel.label : filter==="all25"?"รวมปี 2568":"รวมปี 2569"}
+              </div>
+              <div className="text-3xl font-bold tracking-tight number-pulse">฿{fmt(grandTotal)}</div>
+              <div className="text-white/80 text-xs mt-1">ยอดรวม Volume</div>
             </div>
-            <div className="text-3xl font-bold tracking-tight">฿{fmt(grandTotal)}</div>
-            <div className="text-indigo-200 text-xs mt-1">ยอดรวม Volume</div>
+            <button onClick={() => setShowSettings(!showSettings)}
+              className="w-10 h-10 rounded-xl bg-white/15 hover:bg-white/25 backdrop-blur transition-all flex items-center justify-center text-white border border-white/20"
+              title="Settings">
+              <Settings size={18} className={showSettings ? "rotate-90 transition-transform" : "transition-transform"} />
+            </button>
           </div>
         </div>
       </div>
 
+      {/* Settings Panel */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/30 z-50 flex items-start justify-end" onClick={() => setShowSettings(false)}>
+          <div className="slide-in-right bg-white dark:bg-slate-800 w-80 max-w-full h-full shadow-2xl p-6 space-y-5 overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold flex items-center gap-2 text-gray-800 dark:text-white">
+                <Settings size={18}/> ตั้งค่า UI
+              </h2>
+              <button onClick={() => setShowSettings(false)} className="w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-center">
+                <X size={16} className="text-gray-600 dark:text-gray-300"/>
+              </button>
+            </div>
+
+            {/* Dark mode toggle */}
+            <div>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 block">โหมดการแสดงผล</label>
+              <button onClick={() => setDarkMode(!darkMode)}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-all ${
+                  darkMode ? "bg-slate-700 text-white border-slate-600" : "bg-gray-50 text-gray-700 border-gray-200"
+                }`}>
+                <span className="flex items-center gap-2 text-sm font-semibold">
+                  {darkMode ? <Moon size={16}/> : <Sun size={16}/>}
+                  {darkMode ? "Dark Mode" : "Light Mode"}
+                </span>
+                <div className={`w-10 h-5 rounded-full p-0.5 transition-all ${darkMode ? "bg-indigo-500" : "bg-gray-300"}`}>
+                  <div className={`w-4 h-4 rounded-full bg-white shadow transition-transform ${darkMode ? "translate-x-5" : ""}`}></div>
+                </div>
+              </button>
+            </div>
+
+            {/* Theme picker */}
+            <div>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 block flex items-center gap-1">
+                <Palette size={14}/> ธีมสี
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {(Object.keys(THEMES) as Theme[]).map((k) => {
+                  const th = THEMES[k];
+                  return (
+                    <button key={k} onClick={() => setTheme(k)}
+                      className={`relative px-3 py-3 rounded-xl border-2 transition-all overflow-hidden ${
+                        theme === k ? "border-gray-800 dark:border-white scale-105 shadow-lg" : "border-transparent hover:scale-102"
+                      }`}>
+                      <div className={`absolute inset-0 bg-gradient-to-br ${th.gradient} opacity-90`}></div>
+                      <div className="relative flex items-center justify-between text-white">
+                        <span className="font-bold text-sm">{th.name}</span>
+                        {theme === k && <Check size={14} className="scale-pop"/>}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="text-xs text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-200 dark:border-slate-700">
+              <p>💡 เคล็ดลับ: ธีมจะถูกบันทึกไว้ในเซสชันนี้</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-6 py-6 space-y-5">
         {/* KPI */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="kpi-card rounded-2xl p-5 shadow-md bg-gradient-to-br from-indigo-500 to-violet-600 text-white">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger">
+          <div className={`kpi-card rounded-2xl p-5 shadow-md bg-gradient-to-br ${t.gradient} text-white`}>
             <div className="flex items-start justify-between mb-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-indigo-100">📊 เดือนนี้</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-white/90">📊 เดือนนี้</span>
               <DollarSign size={18} className="text-white/80"/>
             </div>
             <div className="text-2xl font-bold tracking-tight">฿{fmt(grandTotal)}</div>
-            <div className="text-indigo-100 text-xs mt-1">{monthLabel?.range || (filter==="all25"?"ปี 2568":filter==="all26"?"ปี 2569":"")}</div>
+            <div className="text-white/80 text-xs mt-1">{monthLabel?.range || (filter==="all25"?"ปี 2568":filter==="all26"?"ปี 2569":"")}</div>
             {diffPct!==null && (
               <div className="text-xs mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20">
                 {diffPct>0?"↑":diffPct<0?"↓":"•"} {Math.abs(diffPct).toFixed(1)}%
