@@ -958,8 +958,8 @@ export default function App() {
       .sort((a,b)=>b.size-a.size),
   [team5Data]);
 
-  // Heatmap: team5 x months (last 6 months)
-  const heatMonths = MONTHS.slice(-6);
+  // Heatmap: team5 x months (all 18 months from เม.ย. 2568 - ก.ย. 2569)
+  const heatMonths = MONTHS;
   const heatMax = useMemo(() => {
     let mx = 0;
     TEAM5_INFO.forEach(m => heatMonths.forEach(mo => {
@@ -1687,7 +1687,7 @@ export default function App() {
             {/* 2. HEAT MAP */}
             <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
               <h2 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                <BarChart2 size={15} className="text-indigo-500"/> Heat Map — Team 5 (6 เดือนล่าสุด)
+                <BarChart2 size={15} className="text-indigo-500"/> Heat Map — Team 5 ({heatMonths.length} เดือน · เม.ย. 2568 – ก.ย. 2569)
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs border-collapse">
