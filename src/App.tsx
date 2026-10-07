@@ -559,6 +559,7 @@ export default function App() {
 
   // New features state
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [heatRange, setHeatRange] = useState<"3m"|"6m"|"12m"|"ytd"|"all">("all");
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem("ui-favorites");
@@ -958,8 +959,21 @@ export default function App() {
       .sort((a,b)=>b.size-a.size),
   [team5Data]);
 
-  // Heatmap: team5 x months (all 18 months from เม.ย. 2568 - ก.ย. 2569)
-  const heatMonths = MONTHS;
+  // Heatmap: team5 x months (controlled by heatRange)
+  const heatMonths = useMemo(() => {
+    const now = MONTHS.length;
+    switch(heatRange) {
+      case "3m":  return MONTHS.slice(-3);
+      case "6m":  return MONTHS.slice(-6);
+      case "12m": return MONTHS.slice(-12);
+      case "ytd": {
+        // From ม.ค. 2569 onwards (jan, feb, ..., sep) = 9 months
+        const idx = MONTHS.findIndex(m=>m.key==="jan");
+        return idx >= 0 ? MONTHS.slice(idx) : MONTHS.slice(-6);
+      }
+      default:    return MONTHS;
+    }
+  }, [heatRange]);
   const heatMax = useMemo(() => {
     let mx = 0;
     TEAM5_INFO.forEach(m => heatMonths.forEach(mo => {
@@ -967,14 +981,14 @@ export default function App() {
       if(v>mx) mx=v;
     }));
     return mx;
-  },[]);
+  },[heatMonths]);
 
   const heatMembers = useMemo(() =>
     [...TEAM5_INFO]
       .map(m => ({ ...m, total: heatMonths.reduce((s,mo)=>s+(RAW[mo.key]?.[m.code]||0),0) }))
       .sort((a,b)=>b.total-a.total)
       .slice(0,15),
-  []);
+  [heatMonths]);
 
   // Podium top 3 for selected filter
   const podium = useMemo(() =>
@@ -1686,9 +1700,32 @@ export default function App() {
 
             {/* 2. HEAT MAP */}
             <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
-              <h2 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                <BarChart2 size={15} className="text-indigo-500"/> Heat Map — Team 5 ({heatMonths.length} เดือน · เม.ย. 2568 – ก.ย. 2569)
-              </h2>
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <h2 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <BarChart2 size={15} className="text-indigo-500"/> Heat Map — Team 5
+                  <span className="text-xs font-normal text-gray-400">
+                    ({heatMonths.length} เดือน · {heatMonths[0]?.short} – {heatMonths[heatMonths.length-1]?.short})
+                  </span>
+                </h2>
+                <div className="flex gap-1 bg-gray-100 rounded-lg p-0.5">
+                  {([
+                    ["3m","3 เดือน"],
+                    ["6m","6 เดือน"],
+                    ["12m","12 เดือน"],
+                    ["ytd","ปี 2569"],
+                    ["all","ทั้งหมด"],
+                  ] as const).map(([k,l])=>(
+                    <button key={k} onClick={()=>setHeatRange(k)}
+                      className={`px-2.5 py-1 rounded-md text-xs font-medium transition ${
+                        heatRange===k
+                          ? "bg-white text-indigo-600 shadow-sm"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs border-collapse">
                   <thead>
