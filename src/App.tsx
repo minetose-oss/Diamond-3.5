@@ -572,6 +572,8 @@ export default function App() {
     return "THB";
   });
   const [refreshKey, setRefreshKey] = useState<number>(0);
+  const [customColors, setCustomColors] = useState<{from: string; to: string}>({ from: "#6366f1", to: "#a855f7" });
+  const [customThemeActive, setCustomThemeActive] = useState<boolean>(false);
 
   // Persist favorites + currency
   useEffect(() => {
@@ -1012,6 +1014,8 @@ export default function App() {
   },[janRanked,febRanked]);
 
   const t = THEMES[theme];
+  // Override with custom colors if active
+  const activeGradient = customThemeActive ? `from-[${customColors.from}] to-[${customColors.to}]` : t.gradient;
   return (
     <div className={`min-h-screen bg-gradient-to-br ${t.light} font-sans`}>
       {/* Header */}
@@ -1146,6 +1150,42 @@ export default function App() {
                   }`}>
                   <div className="text-2xl mb-1">📂</div>
                   <div className="text-xs font-semibold text-gray-700 dark:text-gray-200">Sidebar ซ้าย</div>
+                </button>
+              </div>
+            </div>
+
+            {/* Custom Theme Builder */}
+            <div>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 block flex items-center gap-1">
+                🎨 Custom Theme <span className="text-xs text-gray-400 font-normal">(กำหนดเอง)</span>
+              </label>
+              <div className="space-y-2 bg-gray-50 dark:bg-slate-900 p-3 rounded-xl">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-600 dark:text-gray-300">สีหลัก</span>
+                  <input type="color" value={customColors.from} onChange={e => setCustomColors({...customColors, from: e.target.value})}
+                    className="w-12 h-8 rounded cursor-pointer border border-gray-200"/>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-600 dark:text-gray-300">สีรอง</span>
+                  <input type="color" value={customColors.to} onChange={e => setCustomColors({...customColors, to: e.target.value})}
+                    className="w-12 h-8 rounded cursor-pointer border border-gray-200"/>
+                </div>
+                <button onClick={() => {
+                  // Apply custom theme
+                  document.documentElement.style.setProperty("--custom-from", customColors.from);
+                  document.documentElement.style.setProperty("--custom-to", customColors.to);
+                  setCustomThemeActive(true);
+                }}
+                  className="w-full px-3 py-2 rounded-lg text-xs font-bold text-white transition-all"
+                  style={{background: `linear-gradient(135deg, ${customColors.from}, ${customColors.to})`}}>
+                  ✅ ใช้ธีมนี้
+                </button>
+                <button onClick={() => {
+                  setCustomThemeActive(false);
+                  setCustomColors({ from: "#6366f1", to: "#a855f7" });
+                }}
+                  className="w-full px-3 py-2 rounded-lg text-xs font-bold bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300">
+                  ↺ รีเซ็ตกลับธีมสำเร็จรูป
                 </button>
               </div>
             </div>
@@ -1451,6 +1491,106 @@ export default function App() {
         {/* ══ VISUAL ══ */}
         {tab==="visual" && (
           <div className="space-y-5">
+
+            {/* 0. AREA CHART - Cumulative Growth */}
+            <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
+              <h2 className="section-title text-sm font-bold text-gray-800 mb-4">🌊 Cumulative Growth — ยอดสะสมรายเดือน</h2>
+              <ResponsiveContainer width="100%" height={240}>
+                  <AreaChart data={monthlyTrend.reduce((arr, m) => {
+                    const prev = arr.length > 0 ? arr[arr.length-1].cum : 0;
+                    arr.push({ ...m, cum: prev + m.volume });
+                    return arr;
+                  }, [] as {month: string; volume: number; year: number; cum: number}[])}>
+                    <defs>
+                      <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#6366f1" stopOpacity={0.8}/>
+                        <stop offset="100%" stopColor="#6366f1" stopOpacity={0.1}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
+                    <XAxis dataKey="month" tick={{fontSize:11}}/>
+                    <YAxis tick={{fontSize:10}} tickFormatter={fmt}/>
+                    <Tooltip formatter={(v:number) => `฿${v.toLocaleString()}`}/>
+                    <Area type="monotone" dataKey="cum" stroke="#6366f1" strokeWidth={3} fill="url(#areaGradient)"/>
+                  </AreaChart>
+                </ResponsiveContainer>
+              <div className="text-center mt-3 text-xs text-gray-500">
+                ยอดรวมสะสม 16 เดือน: <strong className="text-indigo-600 font-bold">฿{fmt(MONTHS.reduce((s,m)=>s+(monthTotals[m.key]||0),0))}</strong>
+              </div>
+            </div>
+
+            {/* 0.5 THAILAND MAP - Province/Region Distribution */}
+            <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
+              <h2 className="section-title text-sm font-bold text-gray-800 mb-4">🗺️ Thailand Map — การกระจายตัวตามภาค</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {(() => {
+                  // Calculate volumes by region
+                  const byRegion: Record<string, {count: number; total: number; members: typeof TEAM5_INFO}> = {
+                    "เหนือ": { count: 0, total: 0, members: [] as any },
+                    "กลาง": { count: 0, total: 0, members: [] as any },
+                    "อีสาน": { count: 0, total: 0, members: [] as any },
+                    "ใต้": { count: 0, total: 0, members: [] as any },
+                    "ตะวันออก": { count: 0, total: 0, members: [] as any },
+                  };
+                  TEAM5_INFO.forEach(m => {
+                    const r = byRegion[m.region] || byRegion["กลาง"];
+                    const vol = RAW[filter]?.[m.code] || 0;
+                    r.count += vol > 0 ? 1 : 0;
+                    r.total += vol;
+                    r.members.push(m);
+                  });
+                  const regions = Object.entries(byRegion).map(([k, v]) => ({ region: k, ...v }));
+                  const maxTotal = Math.max(...regions.map(r => r.total));
+                  const regionColors: Record<string, {bg: string; border: string; text: string; pos: string}> = {
+                    "เหนือ":     { bg: "from-blue-500 to-cyan-600",   border: "border-blue-300", text: "text-blue-700",   pos: "top-4 left-1/2 -translate-x-1/2" },
+                    "กลาง":      { bg: "from-amber-500 to-orange-600", border: "border-amber-300", text: "text-amber-700", pos: "top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2" },
+                    "อีสาน":     { bg: "from-rose-500 to-pink-600",   border: "border-rose-300", text: "text-rose-700",  pos: "top-1/2 -translate-y-1/2 right-4" },
+                    "ใต้":       { bg: "from-emerald-500 to-teal-600", border: "border-emerald-300", text: "text-emerald-700", pos: "bottom-4 left-1/2 -translate-x-1/2" },
+                    "ตะวันออก":  { bg: "from-purple-500 to-violet-600", border: "border-purple-300", text: "text-purple-700", pos: "top-1/2 -translate-y-1/2 left-4" },
+                  };
+                  return regions.map(r => {
+                    const cfg = regionColors[r.region];
+                    const intensity = maxTotal > 0 ? r.total / maxTotal : 0;
+                    return (
+                      <div key={r.region} className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-5 border border-gray-200 relative overflow-hidden">
+                        <div className={`absolute top-2 right-2 w-12 h-12 rounded-full bg-gradient-to-br ${cfg.bg} opacity-20`}></div>
+                        <div className="text-xs uppercase tracking-wider text-gray-500 font-bold mb-2">📍 {r.region}</div>
+                        <div className={`text-3xl font-bold ${cfg.text}`}>฿{fmt(r.total)}</div>
+                        <div className="text-xs text-gray-500 mt-1">{r.count} Active ICs</div>
+                        <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div className={`h-full bg-gradient-to-r ${cfg.bg} rounded-full transition-all duration-700`} style={{width: `${Math.max(5, intensity * 100)}%`}}></div>
+                        </div>
+                        <div className="mt-3 space-y-1">
+                          {r.members.filter(m => (RAW[filter]?.[m.code]||0) > 0).slice(0, 3).map(m => (
+                            <div key={m.code} className="flex items-center justify-between text-xs">
+                              <span className="text-gray-600 truncate">{m.name}</span>
+                              <span className="font-mono text-gray-700">฿{fmt(RAW[filter]?.[m.code]||0)}</span>
+                            </div>
+                          ))}
+                          {r.members.filter(m => (RAW[filter]?.[m.code]||0) > 0).length === 0 && (
+                            <div className="text-xs text-gray-400 italic">ไม่มียอดขายในเดือนนี้</div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+              {/* Simplified Thailand outline */}
+              <div className="mt-4 flex justify-center">
+                <svg viewBox="0 0 400 480" className="w-full max-w-xs">
+                  {/* Thailand rough outline */}
+                  <path d="M180,20 L220,20 L240,50 L260,90 L280,120 L300,150 L290,180 L310,210 L320,240 L330,280 L320,310 L290,340 L260,360 L230,390 L200,420 L170,440 L150,460 L130,450 L120,420 L110,380 L100,340 L90,300 L80,260 L70,220 L80,180 L90,140 L100,100 L120,60 L150,30 Z"
+                    fill="#f3f4f6" stroke="#d1d5db" strokeWidth="2" />
+                  {/* Region labels */}
+                  <text x="200" y="80" textAnchor="middle" className="text-xs fill-blue-600 font-bold">เหนือ</text>
+                  <text x="180" y="220" textAnchor="middle" className="text-xs fill-amber-600 font-bold">กลาง</text>
+                  <text x="280" y="230" textAnchor="middle" className="text-xs fill-rose-600 font-bold">อีสาน</text>
+                  <text x="220" y="380" textAnchor="middle" className="text-xs fill-emerald-600 font-bold">ใต้</text>
+                  <text x="110" y="280" textAnchor="middle" className="text-xs fill-purple-600 font-bold">ตะวันออก</text>
+                </svg>
+              </div>
+            </div>
 
             {/* 1. PODIUM LEADERBOARD */}
             <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
