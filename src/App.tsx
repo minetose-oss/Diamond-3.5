@@ -612,6 +612,60 @@ export default function App() {
   const prevTotal = prevKey ? (monthTotals[prevKey]||0) : null;
   const diffPct = prevTotal && prevTotal>0 ? ((grandTotal-prevTotal)/prevTotal)*100 : undefined;
 
+  // Total carats (approx based on USD 28.59/ct)
+  const totalCarats = Math.round(grandTotal / 28.593);
+  const totalFee = toFee(grandTotal);
+  // Active ICs in selected period
+  const activeICs = useMemo(() => Object.values(selectedVolByCode).filter(v => v > 0).length, [selectedVolByCode]);
+  // YoY: ก.ย. 2568 vs ก.ย. 2569 (use month name matching)
+  const yoyPct = useMemo(() => {
+    const cur = monthTotals[filter] || 0;
+    // find same month previous year (e.g., jul -> jul25, sep -> sep25)
+    let prevKey = "";
+    if (filter.endsWith("25")) prevKey = ""; // already prev year
+    else if (["jan","mar","may","jul","aug","sep","oct","nov","dec"].includes(filter)) prevKey = filter + "25";
+    else if (filter === "feb") prevKey = "";
+    else if (["apr","jun"].includes(filter)) prevKey = filter + "25";
+    const prev = prevKey ? (monthTotals[prevKey] || 0) : 0;
+    return prev > 0 ? ((cur - prev) / prev) * 100 : null;
+  }, [filter, monthTotals]);
+  // Best month overall (highest sales in all 16 months)
+  const bestMonth = useMemo(() => {
+    let max = 0, bestKey = "";
+    for (const m of MONTHS) {
+      const v = monthTotals[m.key] || 0;
+      if (v > max) { max = v; bestKey = m.key; }
+    }
+    return { key: bestKey, vol: max, label: MONTHS.find(m=>m.key===bestKey)?.label || bestKey };
+  }, [monthTotals]);
+  // Top 3 members overall (cumulative)
+  const top3Overall = useMemo(() => {
+    const totals: Record<string, number> = {};
+    for (const mk of MONTHS.map(x=>x.key)) {
+      for (const [code, vol] of Object.entries(RAW[mk] || {})) {
+        totals[code] = (totals[code] || 0) + vol;
+      }
+    }
+    return Object.entries(totals)
+      .map(([code, vol]) => ({ code, vol }))
+      .sort((a,b) => b.vol - a.vol)
+      .slice(0, 3);
+  }, []);
+  // Achievement badges
+  const achievements = useMemo(() => {
+    const badges: {icon:string, label:string, color:string}[] = [];
+    // Top performer (highest sales)
+    if (top10[0]) badges.push({icon:"🏆", label:`Top: ${top10[0].code}`, color:"from-amber-400 to-orange-500"});
+    // Highest fee
+    const maxFee = Math.max(...top10.map(t => toFee(t.vol)));
+    if (maxFee > 0) badges.push({icon:"💎", label:`Max Fee: ฿${fmtFee(maxFee)}`, color:"from-indigo-400 to-purple-500"});
+    // Most active
+    if (activeICs > 0) badges.push({icon:"👥", label:`${activeICs} ICs Active`, color:"from-emerald-400 to-teal-500"});
+    // Best month
+    if (bestMonth.vol > 0) badges.push({icon:"📈", label:`Best: ${bestMonth.label}`, color:"from-rose-400 to-pink-500"});
+    return badges;
+  }, [top10, activeICs, bestMonth]);
+
   // Team5 per-member volumes for selected filter
   const team5Data = useMemo(() => {
     return TEAM5_INFO.map(m => {
@@ -1132,68 +1186,163 @@ export default function App() {
 
         {/* ══ OVERVIEW ══ */}
         {tab==="overview" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="space-y-5">
+            {/* Achievements Badges */}
             <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
-              <h2 className="section-title text-sm font-bold text-gray-800 mb-4">📈 แนวโน้ม Volume รายเดือน <span className="text-xs font-normal text-gray-400 ml-1">เม.ย. 2568 – ก.ย. 2569</span></h2>
-              <ResponsiveContainer width="100%" height={210}>
-                <BarChart data={monthlyTrend}>                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
-                  <XAxis dataKey="month" tick={{fontSize:11}}/>
-                  <YAxis tick={{fontSize:10}} tickFormatter={fmt}/>
-                  <Tooltip formatter={(v:number)=>[`฿${v.toLocaleString()}`,"Volume"]}/>
-                  <Bar dataKey="volume" radius={[6,6,0,0]}>
-                    {monthlyTrend.map((m,i)=>(
-                      <Cell key={i}
-                        fill={m.year===2025 ? "#a78bfa" : "#6366f1"}
-                        opacity={filter===MONTHS[i]?.key ? 1 : 0.6}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-              <div className="flex justify-center gap-4 mt-3 text-xs text-gray-500">
-                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-violet-400 inline-block"/>ปี 2568</span>
-                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-indigo-600 inline-block"/>ปี 2569</span>
+              <h2 className="section-title text-sm font-bold text-gray-800 mb-3">🏅 Achievements & Highlights</h2>
+              <div className="flex flex-wrap gap-2">
+                {achievements.map((a, i) => (
+                  <div key={i} className={`bg-gradient-to-r ${a.color} text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-sm`}>
+                    <span className="text-sm">{a.icon}</span>
+                    <span>{a.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
-              <h2 className="section-title text-sm font-bold text-gray-800 mb-2">
-                🥧 สัดส่วนตาม Team
-                <span className="ml-2 text-xs font-normal text-indigo-500">
-                  ({monthLabel?.short || (filter==="all25"?"ปี 2568":"ปี 2569")})
-                </span>
-              </h2>
-              <ResponsiveContainer width="100%" height={210}>
-                <PieChart>
-                  <Pie data={teamSingle} dataKey="volume" nameKey="name" cx="50%" cy="50%" outerRadius={95} labelLine={false}
-                    label={({cx,cy,midAngle,innerRadius,outerRadius,name,percent}:any)=>{
-                      if(percent<0.05) return null;
-                      const R=Math.PI/180,r=innerRadius+(outerRadius-innerRadius)*0.5;
-                      return <text x={cx+r*Math.cos(-midAngle*R)} y={cy+r*Math.sin(-midAngle*R)}
-                        fill="white" textAnchor="middle" dominantBaseline="central" fontSize={10} fontWeight="bold">{name}</text>;
-                    }}>
-                    {teamSingle.map((t,i)=><Cell key={i} fill={t.color}/>)}
-                  </Pie>
-                  <Tooltip formatter={(v:number)=>`฿${fmt(v)}`}/>
-                </PieChart>
-              </ResponsiveContainer>
+            {/* Quick Stats Row */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <div className="card-lift bg-white rounded-2xl p-4 shadow-md border border-gray-100/80">
+                <div className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">💎 Total CT</div>
+                <div className="text-xl font-bold text-gray-800">{totalCarats.toLocaleString()}</div>
+                <div className="text-xs text-gray-400">carats</div>
+              </div>
+              <div className="card-lift bg-white rounded-2xl p-4 shadow-md border border-gray-100/80">
+                <div className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">💰 Total Fee</div>
+                <div className="text-xl font-bold text-gray-800">฿{fmtFee(totalFee)}</div>
+                <div className="text-xs text-gray-400">@ 0.966%</div>
+              </div>
+              <div className="card-lift bg-white rounded-2xl p-4 shadow-md border border-gray-100/80">
+                <div className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">👥 Active ICs</div>
+                <div className="text-xl font-bold text-gray-800">{activeICs}</div>
+                <div className="text-xs text-gray-400">ICs</div>
+              </div>
+              <div className="card-lift bg-white rounded-2xl p-4 shadow-md border border-gray-100/80">
+                <div className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">📈 Avg/IC</div>
+                <div className="text-xl font-bold text-gray-800">฿{fmt(activeICs > 0 ? grandTotal/activeICs : 0)}</div>
+                <div className="text-xs text-gray-400">per IC</div>
+              </div>
+              <div className="card-lift bg-white rounded-2xl p-4 shadow-md border border-gray-100/80">
+                <div className="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">📊 YoY Growth</div>
+                <div className={`text-xl font-bold ${yoyPct === null ? "text-gray-400" : yoyPct > 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                  {yoyPct === null ? "—" : `${yoyPct > 0 ? "+" : ""}${yoyPct.toFixed(1)}%`}
+                </div>
+                <div className="text-xs text-gray-400">vs ปีก่อน</div>
+              </div>
             </div>
 
-            <div className="md:col-span-2 card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
-              <h2 className="section-title text-sm font-bold text-gray-800 mb-4">🏆 Top 10 — {monthLabel?.label || (filter==="all25"?"รวมปี 2568":"รวมปี 2569")}</h2>
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={top10} layout="vertical" margin={{left:10,right:30}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
-                  <XAxis type="number" tick={{fontSize:10}} tickFormatter={fmt}/>
-                  <YAxis type="category" dataKey="code" tick={{fontSize:11,fontFamily:"monospace"}} width={70}/>
-                  <Tooltip formatter={(v:number)=>[`฿${v.toLocaleString()}`,"Volume"]}/>
-                  <Bar dataKey="vol" radius={[0,6,6,0]}>
-                    {top10.map((_,i)=>(
-                      <Cell key={i} fill={i===0?"#f59e0b":i===1?"#94a3b8":i===2?"#cd7c2f":"#6366f1"}/>
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
+                <h2 className="section-title text-sm font-bold text-gray-800 mb-4">📈 แนวโน้ม Volume รายเดือน <span className="text-xs font-normal text-gray-400 ml-1">เม.ย. 2568 – ก.ย. 2569</span></h2>
+                <ResponsiveContainer width="100%" height={210}>
+                  <BarChart data={monthlyTrend}>                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
+                    <XAxis dataKey="month" tick={{fontSize:11}}/>
+                    <YAxis tick={{fontSize:10}} tickFormatter={fmt}/>
+                    <Tooltip formatter={(v:number)=>[`฿${v.toLocaleString()}`,"Volume"]}/>
+                    <Bar dataKey="volume" radius={[6,6,0,0]}>
+                      {monthlyTrend.map((m,i)=>(
+                        <Cell key={i}
+                          fill={m.year===2025 ? "#a78bfa" : "#6366f1"}
+                          opacity={filter===MONTHS[i]?.key ? 1 : 0.6}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+                <div className="flex justify-center gap-4 mt-3 text-xs text-gray-500">
+                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-violet-400 inline-block"/>ปี 2568</span>
+                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-indigo-600 inline-block"/>ปี 2569</span>
+                </div>
+              </div>
+
+              <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
+                <h2 className="section-title text-sm font-bold text-gray-800 mb-2">
+                  🥧 สัดส่วนตาม Team
+                  <span className="ml-2 text-xs font-normal text-indigo-500">
+                    ({monthLabel?.short || (filter==="all25"?"ปี 2568":"ปี 2569")})
+                  </span>
+                </h2>
+                <ResponsiveContainer width="100%" height={210}>
+                  <PieChart>
+                    <Pie data={teamSingle} dataKey="volume" nameKey="name" cx="50%" cy="50%" outerRadius={95} labelLine={false}
+                      label={({cx,cy,midAngle,innerRadius,outerRadius,name,percent}:any)=>{
+                        if(percent<0.05) return null;
+                        const R=Math.PI/180,r=innerRadius+(outerRadius-innerRadius)*0.5;
+                        return <text x={cx+r*Math.cos(-midAngle*R)} y={cy+r*Math.sin(-midAngle*R)}
+                          fill="white" textAnchor="middle" dominantBaseline="central" fontSize={10} fontWeight="bold">{name}</text>;
+                      }}>
+                      {teamSingle.map((t,i)=><Cell key={i} fill={t.color}/>)}
+                    </Pie>
+                    <Tooltip formatter={(v:number)=>`฿${fmt(v)}`}/>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
+                <h2 className="section-title text-sm font-bold text-gray-800 mb-4">👑 Top 3 Lifetime</h2>
+                <div className="space-y-3">
+                  {top3Overall.map((m, i) => {
+                    const maxVol = top3Overall[0].vol;
+                    const pct = (m.vol / maxVol) * 100;
+                    const medals = ["🥇", "🥈", "🥉"];
+                    const colors = ["from-amber-400 to-orange-500", "from-gray-300 to-gray-400", "from-orange-300 to-amber-600"];
+                    return (
+                      <div key={m.code} className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${colors[i]} flex items-center justify-center text-white text-lg shadow-md`}>
+                          {medals[i]}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-mono font-bold text-gray-800">{m.code}</span>
+                            <span className="text-sm font-bold text-gray-700">฿{fmt(m.vol)}</span>
+                          </div>
+                          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div className={`h-full bg-gradient-to-r ${colors[i]} transition-all`} style={{width: `${pct}%`}}></div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
+                <h2 className="section-title text-sm font-bold text-gray-800 mb-4">⭐ Best Month & Quick Insight</h2>
+                <div className="space-y-3">
+                  <div className="bg-gradient-to-br from-indigo-50 to-violet-50 rounded-xl p-4 border border-indigo-100">
+                    <div className="text-[10px] uppercase tracking-wider text-indigo-600 font-bold mb-1">📅 Best Month (16 months)</div>
+                    <div className="text-2xl font-bold text-gray-800">{bestMonth.label}</div>
+                    <div className="text-sm text-gray-600 mt-1">฿{fmt(bestMonth.vol)}</div>
+                  </div>
+                  <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-4 border border-emerald-100">
+                    <div className="text-[10px] uppercase tracking-wider text-emerald-600 font-bold mb-1">💡 Insight</div>
+                    <div className="text-sm text-gray-700">
+                      {yoyPct !== null && yoyPct > 0 ?
+                        `เดือนนี้เติบโต ${yoyPct.toFixed(1)}% YoY 🚀` :
+                        yoyPct !== null && yoyPct < 0 ?
+                        `เดือนนี้ลดลง ${Math.abs(yoyPct).toFixed(1)}% YoY ⚠️` :
+                        `มี ${activeICs} ICs ทำยอดในช่วงนี้`}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="md:col-span-2 card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
+                <h2 className="section-title text-sm font-bold text-gray-800 mb-4">🏆 Top 10 — {monthLabel?.label || (filter==="all25"?"รวมปี 2568":"รวมปี 2569")}</h2>
+                <ResponsiveContainer width="100%" height={320}>
+                  <BarChart data={top10} layout="vertical" margin={{left:10,right:30}}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
+                    <XAxis type="number" tick={{fontSize:10}} tickFormatter={fmt}/>
+                    <YAxis type="category" dataKey="code" tick={{fontSize:11,fontFamily:"monospace"}} width={70}/>
+                    <Tooltip formatter={(v:number)=>[`฿${v.toLocaleString()}`,"Volume"]}/>
+                    <Bar dataKey="vol" radius={[0,6,6,0]}>
+                      {top10.map((_,i)=>(
+                        <Cell key={i} fill={i===0?"#f59e0b":i===1?"#94a3b8":i===2?"#cd7c2f":"#6366f1"}/>
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
         )}
