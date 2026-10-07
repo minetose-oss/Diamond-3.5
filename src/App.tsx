@@ -1599,61 +1599,79 @@ export default function App() {
                 <Trophy size={15} className="text-amber-500"/> Leaderboard Podium — Team 5
                 <span className="text-xs font-normal text-gray-400 ml-1">({monthLabel?.short || (filter==="all25"?"ปี 2568":"ปี 2569")})</span>
               </h2>
-              <div className="flex items-end justify-center gap-3 md:gap-5 mb-6">
+              <div className="flex items-end justify-center gap-3 md:gap-4 mb-6 px-2">
                 {/* 2nd place */}
                 {podium[1] && (
                   <div className="flex flex-col items-center flex-1 max-w-[140px]">
-                    <div className="relative mb-2">
-                      <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-gray-200 to-gray-400 flex items-center justify-center text-white font-bold text-lg md:text-xl border-4 border-white shadow-lg">
-                        {podium[1].name.charAt(0)}
+                    <div className="bg-white rounded-2xl p-3 shadow-lg border-2 border-gray-200 w-full mb-3">
+                      <div className="flex justify-center mb-2">
+                        <div className="relative">
+                          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center text-white font-extrabold text-2xl shadow-md">
+                            {podium[1].name.charAt(0)}
+                          </div>
+                          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-gray-600 text-white flex items-center justify-center font-extrabold text-sm shadow-md border-2 border-white">
+                            2
+                          </div>
+                        </div>
                       </div>
-                      <div className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-gray-500 text-white flex items-center justify-center font-bold text-xs shadow-md">
-                        2
+                      <div className="text-center">
+                        <div className="font-bold text-gray-800 text-base leading-tight">{podium[1].name}</div>
+                        <div className="text-xs text-gray-500 mt-0.5">📍 {podium[1].province}</div>
                       </div>
                     </div>
-                    <div className="font-bold text-gray-700 text-sm">{podium[1].name}</div>
-                    <div className="text-xs text-gray-400 mb-2">{podium[1].province}</div>
-                    <div className="bg-gradient-to-t from-gray-300 to-gray-200 rounded-t-xl w-full flex flex-col items-center justify-end py-2 px-2 shadow-md" style={{height:90}}>
-                      <div className="font-bold text-gray-700 text-sm">฿{fmt(podium[1].vol)}</div>
-                      <div className="text-gray-600 text-xs">#{podium[1].ic}</div>
+                    <div className="bg-gradient-to-t from-gray-400 to-gray-300 rounded-t-xl w-full flex flex-col items-center justify-end py-3 px-2 text-white shadow-md" style={{height:100}}>
+                      <div className="font-bold text-base">฿{fmt(podium[1].vol)}</div>
+                      <div className="text-xs opacity-80 mt-0.5">#{podium[1].ic}</div>
                     </div>
                   </div>
                 )}
                 {/* 1st place */}
                 {podium[0] && (
-                  <div className="flex flex-col items-center flex-1 max-w-[160px] -mt-4">
-                    <div className="relative mb-2">
-                      <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-amber-300 to-orange-500 flex items-center justify-center text-white font-bold text-2xl md:text-3xl border-4 border-white shadow-xl ring-4 ring-amber-200">
-                        {podium[0].name.charAt(0)}
+                  <div className="flex flex-col items-center flex-1 max-w-[170px] -mt-6">
+                    <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl p-3 shadow-xl border-2 border-amber-300 w-full mb-3">
+                      <div className="flex justify-center mb-2">
+                        <div className="relative">
+                          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-extrabold text-3xl shadow-lg ring-4 ring-amber-200">
+                            {podium[0].name.charAt(0)}
+                          </div>
+                          <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-extrabold text-base shadow-md border-2 border-white">
+                            👑
+                          </div>
+                        </div>
                       </div>
-                      <div className="absolute -top-2 -right-2 w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-bold text-sm shadow-lg">
-                        👑
+                      <div className="text-center">
+                        <div className="font-extrabold text-amber-900 text-lg leading-tight">{podium[0].name}</div>
+                        <div className="text-xs text-amber-700 mt-0.5">📍 {podium[0].province}</div>
                       </div>
                     </div>
-                    <div className="font-bold text-gray-800 text-base">{podium[0].name}</div>
-                    <div className="text-xs text-gray-500 mb-2">{podium[0].province}</div>
-                    <div className="bg-gradient-to-t from-amber-500 to-yellow-400 rounded-t-xl w-full flex flex-col items-center justify-end py-3 px-2 shadow-lg" style={{height:120}}>
-                      <div className="font-bold text-white text-base">฿{fmt(podium[0].vol)}</div>
-                      <div className="text-amber-100 text-xs">#{podium[0].ic}</div>
+                    <div className="bg-gradient-to-t from-amber-500 to-yellow-400 rounded-t-xl w-full flex flex-col items-center justify-end py-3 px-2 text-white shadow-lg" style={{height:130}}>
+                      <div className="font-extrabold text-lg">฿{fmt(podium[0].vol)}</div>
+                      <div className="text-xs opacity-90 mt-0.5">#{podium[0].ic}</div>
                     </div>
                   </div>
                 )}
                 {/* 3rd place */}
                 {podium[2] && (
                   <div className="flex flex-col items-center flex-1 max-w-[140px]">
-                    <div className="relative mb-2">
-                      <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-orange-300 to-orange-500 flex items-center justify-center text-white font-bold text-lg md:text-xl border-4 border-white shadow-lg">
-                        {podium[2].name.charAt(0)}
+                    <div className="bg-white rounded-2xl p-3 shadow-lg border-2 border-orange-200 w-full mb-3">
+                      <div className="flex justify-center mb-2">
+                        <div className="relative">
+                          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-extrabold text-2xl shadow-md">
+                            {podium[2].name.charAt(0)}
+                          </div>
+                          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-orange-600 text-white flex items-center justify-center font-extrabold text-sm shadow-md border-2 border-white">
+                            3
+                          </div>
+                        </div>
                       </div>
-                      <div className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold text-xs shadow-md">
-                        3
+                      <div className="text-center">
+                        <div className="font-bold text-gray-800 text-base leading-tight">{podium[2].name}</div>
+                        <div className="text-xs text-gray-500 mt-0.5">📍 {podium[2].province}</div>
                       </div>
                     </div>
-                    <div className="font-bold text-gray-700 text-sm">{podium[2].name}</div>
-                    <div className="text-xs text-gray-400 mb-2">{podium[2].province}</div>
-                    <div className="bg-gradient-to-t from-orange-400 to-orange-300 rounded-t-xl w-full flex flex-col items-center justify-end py-2 px-2 shadow-md" style={{height:70}}>
-                      <div className="font-bold text-white text-sm">฿{fmt(podium[2].vol)}</div>
-                      <div className="text-orange-100 text-xs">#{podium[2].ic}</div>
+                    <div className="bg-gradient-to-t from-orange-500 to-orange-400 rounded-t-xl w-full flex flex-col items-center justify-end py-3 px-2 text-white shadow-md" style={{height:80}}>
+                      <div className="font-bold text-base">฿{fmt(podium[2].vol)}</div>
+                      <div className="text-xs opacity-80 mt-0.5">#{podium[2].ic}</div>
                     </div>
                   </div>
                 )}
