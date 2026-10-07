@@ -1606,10 +1606,7 @@ export default function App() {
                     <div className="bg-white rounded-2xl p-3 shadow-lg border-2 border-gray-200 w-full mb-3">
                       <div className="flex justify-center mb-2">
                         <div className="relative">
-                          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center text-white font-extrabold text-2xl shadow-md">
-                            {podium[1].name.charAt(0)}
-                          </div>
-                          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-gray-600 text-white flex items-center justify-center font-extrabold text-sm shadow-md border-2 border-white">
+                          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center text-white font-extrabold text-3xl shadow-md" style={{textShadow: '0 2px 4px rgba(0,0,0,0.3)'}}>
                             2
                           </div>
                         </div>
@@ -1631,11 +1628,8 @@ export default function App() {
                     <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl p-3 shadow-xl border-2 border-amber-300 w-full mb-3">
                       <div className="flex justify-center mb-2">
                         <div className="relative">
-                          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-extrabold text-3xl shadow-lg ring-4 ring-amber-200">
-                            {podium[0].name.charAt(0)}
-                          </div>
-                          <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center font-extrabold text-base shadow-md border-2 border-white">
-                            👑
+                          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-extrabold text-5xl shadow-lg ring-4 ring-amber-200" style={{textShadow: '0 2px 6px rgba(0,0,0,0.4)'}}>
+                            1
                           </div>
                         </div>
                       </div>
@@ -1656,10 +1650,7 @@ export default function App() {
                     <div className="bg-white rounded-2xl p-3 shadow-lg border-2 border-orange-200 w-full mb-3">
                       <div className="flex justify-center mb-2">
                         <div className="relative">
-                          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-extrabold text-2xl shadow-md">
-                            {podium[2].name.charAt(0)}
-                          </div>
-                          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-orange-600 text-white flex items-center justify-center font-extrabold text-sm shadow-md border-2 border-white">
+                          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-extrabold text-3xl shadow-md" style={{textShadow: '0 2px 4px rgba(0,0,0,0.3)'}}>
                             3
                           </div>
                         </div>
