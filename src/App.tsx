@@ -3,6 +3,7 @@ import { Settings, Moon, Sun, Palette, X, Check } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
+  AreaChart, Area,
   LineChart, Line, Treemap,
 } from "recharts";
 import { TrendingUp, TrendingDown, DollarSign, Target, Award, MapPin, Users, BarChart2, Trophy, Search, Download, RefreshCw, Heart, Calendar, Sparkles, Eye, Layers, Activity } from "lucide-react";
