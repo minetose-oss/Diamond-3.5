@@ -59,3 +59,164 @@ img {
 .fixed {
   position: fixed;
 }
+
+/* ── Luxury Diamond Theme ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap');
+
+body {
+  font-family: 'Sarabun', 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth gradient backgrounds */
+.bg-diamond-hero {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 25%, #4c1d95 50%, #5b21b6 75%, #1e1b4b 100%);
+  background-size: 200% 200%;
+  animation: gradient-shift 12s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Sparkle decoration */
+.sparkle-bg {
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(255,255,255,0.1) 0%, transparent 1%),
+    radial-gradient(circle at 80% 40%, rgba(255,255,255,0.08) 0%, transparent 1%),
+    radial-gradient(circle at 30% 70%, rgba(255,255,255,0.06) 0%, transparent 1%),
+    radial-gradient(circle at 90% 80%, rgba(255,255,255,0.08) 0%, transparent 1%);
+  background-size: 100% 100%;
+}
+
+/* Card hover lift */
+.card-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+}
+
+/* KPI gradient cards */
+.kpi-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.kpi-card:hover::before {
+  opacity: 1;
+}
+.kpi-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 20px 40px -12px rgba(99, 102, 241, 0.25);
+}
+
+/* Filter pill animation */
+.pill-active {
+  position: relative;
+}
+.pill-active::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: #6366f1;
+  border-radius: 50%;
+}
+
+/* Subtle fade-in animation */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fade-up 0.4s ease-out;
+}
+
+/* Diamond icon */
+.diamond-icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c7d2fe;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a5b4fc;
+}
+
+/* Section header underline */
+.section-title {
+  position: relative;
+  padding-left: 12px;
+}
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 4px;
+  background: linear-gradient(to bottom, #6366f1, #a855f7);
+  border-radius: 2px;
+}
+
+/* Glass effect for header */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Smooth tab underline */
+.tab-active-underline {
+  position: relative;
+}
+.tab-active-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #6366f1, #a855f7);
+  border-radius: 2px;
+}
+
+/* Bar chart custom tooltip */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  border-radius: 12px !important;
+  border: none !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+  padding: 8px 12px !important;
+}

@@ -833,65 +833,102 @@ export default function App() {
   },[janRanked,febRanked]);
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-violet-50/40 font-sans">
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-6 py-5">
-        <div className="max-w-6xl mx-auto flex flex-wrap gap-3 items-center justify-between">
-          <div>
-            <div className="text-xs text-indigo-300 font-medium mb-0.5">Globlex Securities · #Wealth 4</div>
-            <h1 className="text-xl font-bold">SUB/SWI High Fee Volume</h1>
-            <p className="text-indigo-200 text-sm mt-0.5">เม.ย. 2568 – ก.ย. 2569</p>
+      <div className="bg-diamond-hero sparkle-bg text-white px-6 py-7 shadow-xl">
+        <div className="max-w-7xl mx-auto flex flex-wrap gap-4 items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="diamond-icon w-12 h-12 shadow-lg"></div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] uppercase tracking-widest text-indigo-200 font-bold">Globlex Securities · #Wealth 4</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-400/30">● LIVE</span>
+              </div>
+              <h1 className="text-2xl font-bold tracking-tight">SUB/SWI High Fee Volume</h1>
+              <p className="text-indigo-200 text-sm mt-1">💎 เม.ย. 2568 – ก.ย. 2569 · 16 เดือน</p>
+            </div>
           </div>
           <div className="text-right">
-            <div className="text-xl font-bold">฿{fmt(grandTotal)}</div>
-            <div className="text-indigo-200 text-xs">
+            <div className="text-[10px] uppercase tracking-wider text-indigo-300 font-bold mb-1">
               {monthLabel ? monthLabel.label : filter==="all25"?"รวมปี 2568":"รวมปี 2569"}
             </div>
+            <div className="text-3xl font-bold tracking-tight">฿{fmt(grandTotal)}</div>
+            <div className="text-indigo-200 text-xs mt-1">ยอดรวม Volume</div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-6 space-y-5">
+      <div className="max-w-7xl mx-auto px-6 py-6 space-y-5">
         {/* KPI */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <KpiCard
-            title={monthLabel ? monthLabel.label : filter==="all25"?"รวมปี 2568":"รวมปี 2569"}
-            value={`฿${fmt(grandTotal)}`}
-            sub={monthLabel?.range || ""}
-            icon={DollarSign} bg="bg-indigo-500" diff={diffPct}
-          />
-          <KpiCard title="รวมปี 2568" value={`฿${fmt(MONTHS.filter(m=>m.year===2025).reduce((s,m)=>s+(monthTotals[m.key]||0),0))}`}
-            sub="เม.ย.–ธ.ค. 2568" icon={Target} bg="bg-violet-500"/>
-          <KpiCard title="รวมปี 2569" value={`฿${fmt(MONTHS.filter(m=>m.year===2026).reduce((s,m)=>s+(monthTotals[m.key]||0),0))}`}
-            sub="ม.ค.–ก.ย. 2569" icon={DollarSign} bg="bg-emerald-500"/>
-          <KpiCard title="🏆 Top เดือนนี้" value={top10[0]?.code||"—"}
-            sub={top10[0]?`฿${fmt(top10[0].vol)}`:"—"} icon={Award} bg="bg-amber-500"/>
+          <div className="kpi-card rounded-2xl p-5 shadow-md bg-gradient-to-br from-indigo-500 to-violet-600 text-white">
+            <div className="flex items-start justify-between mb-3">
+              <span className="text-xs font-semibold uppercase tracking-wider text-indigo-100">📊 เดือนนี้</span>
+              <DollarSign size={18} className="text-white/80"/>
+            </div>
+            <div className="text-2xl font-bold tracking-tight">฿{fmt(grandTotal)}</div>
+            <div className="text-indigo-100 text-xs mt-1">{monthLabel?.range || (filter==="all25"?"ปี 2568":filter==="all26"?"ปี 2569":"")}</div>
+            {diffPct!==null && (
+              <div className="text-xs mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20">
+                {diffPct>0?"↑":diffPct<0?"↓":"•"} {Math.abs(diffPct).toFixed(1)}%
+              </div>
+            )}
+          </div>
+          <div className="kpi-card rounded-2xl p-5 shadow-md bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+            <div className="flex items-start justify-between mb-3">
+              <span className="text-xs font-semibold uppercase tracking-wider text-violet-100">📅 ปี 2568</span>
+              <Target size={18} className="text-white/80"/>
+            </div>
+            <div className="text-2xl font-bold tracking-tight">฿{fmt(MONTHS.filter(m=>m.year===2025).reduce((s,m)=>s+(monthTotals[m.key]||0),0))}</div>
+            <div className="text-violet-100 text-xs mt-1">เม.ย.–ธ.ค. 2568</div>
+          </div>
+          <div className="kpi-card rounded-2xl p-5 shadow-md bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+            <div className="flex items-start justify-between mb-3">
+              <span className="text-xs font-semibold uppercase tracking-wider text-emerald-100">📅 ปี 2569</span>
+              <DollarSign size={18} className="text-white/80"/>
+            </div>
+            <div className="text-2xl font-bold tracking-tight">฿{fmt(MONTHS.filter(m=>m.year===2026).reduce((s,m)=>s+(monthTotals[m.key]||0),0))}</div>
+            <div className="text-emerald-100 text-xs mt-1">ม.ค.–ก.ย. 2569</div>
+          </div>
+          <div className="kpi-card rounded-2xl p-5 shadow-md bg-gradient-to-br from-amber-500 to-orange-600 text-white">
+            <div className="flex items-start justify-between mb-3">
+              <span className="text-xs font-semibold uppercase tracking-wider text-amber-100">🏆 Top เดือนนี้</span>
+              <Award size={18} className="text-white/80"/>
+            </div>
+            <div className="text-2xl font-bold tracking-tight">{top10[0]?.code||"—"}</div>
+            <div className="text-amber-100 text-xs mt-1">{top10[0]?`฿${fmt(top10[0].vol)}`:"—"}</div>
+          </div>
         </div>
 
         {/* Month Filter */}
-        <div className="bg-white rounded-2xl px-5 py-4 shadow-sm border border-gray-100 space-y-3">
-          <span className="text-sm text-gray-600 font-semibold">📅 เลือกช่วงเวลา:</span>
+        <div className="bg-white/80 backdrop-blur rounded-2xl px-5 py-4 shadow-md border border-white/60">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-sm">📅</div>
+            <span className="text-sm font-bold text-gray-700">เลือกช่วงเวลา</span>
+          </div>
           {FILTER_GROUPS.map(g=>(
-            <div key={g.label} className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-gray-400 w-20 shrink-0">{g.label}</span>
+            <div key={g.label} className="flex items-center gap-2 flex-wrap mb-2 last:mb-0">
+              <span className="text-xs text-gray-400 w-20 shrink-0 font-medium">{g.label}</span>
               {g.items.map(f=>(
                 <button key={f.key} onClick={()=>setFilter(f.key)}
-                  className={`px-3 py-1 rounded-xl text-xs font-medium transition-all border ${
-                    filter===f.key?"bg-indigo-600 text-white border-indigo-600 shadow":"bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100"
-                  } ${f.key.startsWith("all")?"border-dashed":""}`}>{f.label}</button>
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                    filter===f.key
+                      ?"bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md scale-105"
+                      :"bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}>{f.label}</button>
               ))}
             </div>
           ))}
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2">
+        <div className="bg-white/80 backdrop-blur rounded-2xl p-1.5 shadow-md border border-white/60 inline-flex gap-1 flex-wrap">
           {TABS.map(t=>(
             <button key={t.key} onClick={()=>setTab(t.key)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                 tab===t.key
-                  ? t.key==="team5"?"bg-emerald-600 text-white shadow":"bg-indigo-600 text-white shadow"
-                  : "bg-white text-gray-500 hover:bg-gray-100 border border-gray-200"
+                  ? t.key==="team5"?"bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md":"bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md"
+                  : "text-gray-500 hover:bg-gray-100"
               }`}>{t.label}</button>
           ))}
         </div>
@@ -899,39 +936,39 @@ export default function App() {
         {/* ══ OVERVIEW ══ */}
         {tab==="overview" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <h2 className="text-sm font-semibold text-gray-700 mb-4">แนวโน้ม Volume รายเดือน (เม.ย. 2568 – ก.ย. 2569)</h2>
-              <ResponsiveContainer width="100%" height={200}>
+            <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
+              <h2 className="section-title text-sm font-bold text-gray-800 mb-4">📈 แนวโน้ม Volume รายเดือน <span className="text-xs font-normal text-gray-400 ml-1">เม.ย. 2568 – ก.ย. 2569</span></h2>
+              <ResponsiveContainer width="100%" height={210}>
                 <BarChart data={monthlyTrend}>                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
                   <XAxis dataKey="month" tick={{fontSize:11}}/>
                   <YAxis tick={{fontSize:10}} tickFormatter={fmt}/>
                   <Tooltip formatter={(v:number)=>[`฿${v.toLocaleString()}`,"Volume"]}/>
-                  <Bar dataKey="volume" radius={[4,4,0,0]}>
+                  <Bar dataKey="volume" radius={[6,6,0,0]}>
                     {monthlyTrend.map((m,i)=>(
                       <Cell key={i}
                         fill={m.year===2025 ? "#a78bfa" : "#6366f1"}
-                        opacity={filter===MONTHS[i]?.key ? 1 : 0.65}
+                        opacity={filter===MONTHS[i]?.key ? 1 : 0.6}
                       />
                     ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-              <div className="flex justify-center gap-4 mt-2 text-xs text-gray-500">
-                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-violet-400 inline-block"/>ปี 2568</span>
-                <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-indigo-600 inline-block"/>ปี 2569</span>
+              <div className="flex justify-center gap-4 mt-3 text-xs text-gray-500">
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-violet-400 inline-block"/>ปี 2568</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-indigo-600 inline-block"/>ปี 2569</span>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <h2 className="text-sm font-semibold text-gray-700 mb-2">
-                สัดส่วนตาม Team
+            <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
+              <h2 className="section-title text-sm font-bold text-gray-800 mb-2">
+                🥧 สัดส่วนตาม Team
                 <span className="ml-2 text-xs font-normal text-indigo-500">
                   ({monthLabel?.short || (filter==="all25"?"ปี 2568":"ปี 2569")})
                 </span>
               </h2>
               <ResponsiveContainer width="100%" height={210}>
                 <PieChart>
-                  <Pie data={teamSingle} dataKey="volume" nameKey="name" cx="50%" cy="50%" outerRadius={90} labelLine={false}
+                  <Pie data={teamSingle} dataKey="volume" nameKey="name" cx="50%" cy="50%" outerRadius={95} labelLine={false}
                     label={({cx,cy,midAngle,innerRadius,outerRadius,name,percent}:any)=>{
                       if(percent<0.05) return null;
                       const R=Math.PI/180,r=innerRadius+(outerRadius-innerRadius)*0.5;
@@ -945,15 +982,15 @@ export default function App() {
               </ResponsiveContainer>
             </div>
 
-            <div className="md:col-span-2 bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <h2 className="text-sm font-semibold text-gray-700 mb-4">Top 10 — {monthLabel?.label || (filter==="all25"?"รวมปี 2568":"รวมปี 2569")}</h2>
-              <ResponsiveContainer width="100%" height={300}>
+            <div className="md:col-span-2 card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
+              <h2 className="section-title text-sm font-bold text-gray-800 mb-4">🏆 Top 10 — {monthLabel?.label || (filter==="all25"?"รวมปี 2568":"รวมปี 2569")}</h2>
+              <ResponsiveContainer width="100%" height={320}>
                 <BarChart data={top10} layout="vertical" margin={{left:10,right:30}}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
                   <XAxis type="number" tick={{fontSize:10}} tickFormatter={fmt}/>
                   <YAxis type="category" dataKey="code" tick={{fontSize:11,fontFamily:"monospace"}} width={70}/>
                   <Tooltip formatter={(v:number)=>[`฿${v.toLocaleString()}`,"Volume"]}/>
-                  <Bar dataKey="vol" radius={[0,4,4,0]}>
+                  <Bar dataKey="vol" radius={[0,6,6,0]}>
                     {top10.map((_,i)=>(
                       <Cell key={i} fill={i===0?"#f59e0b":i===1?"#94a3b8":i===2?"#cd7c2f":"#6366f1"}/>
                     ))}
@@ -969,7 +1006,7 @@ export default function App() {
           <div className="space-y-5">
 
             {/* 1. PODIUM LEADERBOARD */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
               <h2 className="text-sm font-semibold text-gray-700 mb-6 flex items-center gap-2">
                 <Trophy size={15} className="text-amber-500"/> Leaderboard Podium — Team 5
                 <span className="text-xs font-normal text-gray-400 ml-1">({monthLabel?.short || (filter==="all25"?"ปี 2568":"ปี 2569")})</span>
@@ -1037,7 +1074,7 @@ export default function App() {
             </div>
 
             {/* 2. HEAT MAP */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
               <h2 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
                 <BarChart2 size={15} className="text-indigo-500"/> Heat Map — Team 5 (6 เดือนล่าสุด)
               </h2>
@@ -1091,7 +1128,7 @@ export default function App() {
             </div>
 
             {/* 3. TREEMAP */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
               <h2 className="text-sm font-semibold text-gray-700 mb-4">
                 🗂️ Treemap — สัดส่วน Volume Team 5
                 <span className="ml-2 text-xs font-normal text-gray-400">({monthLabel?.short || (filter==="all25"?"ปี 2568":"ปี 2569")})</span>
@@ -1134,7 +1171,7 @@ export default function App() {
             </div>
 
             {/* 4. TREND LINE */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
               <h2 className="text-sm font-semibold text-gray-700 mb-4">
                 📈 Trend Line — Top 5 Team 5 (เม.ย. 2568 – ก.ย. 2569)
               </h2>
@@ -1162,7 +1199,7 @@ export default function App() {
         {/* ══ TEAM ══ */}
         {tab==="team" && (
           <div className="space-y-5">
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
               <h2 className="text-sm font-semibold text-gray-700 mb-4">
                 Volume รายทีม — {monthLabel?.label || (filter==="all25"?"รวมปี 2568":"รวมปี 2569")}
               </h2>
@@ -1274,7 +1311,7 @@ export default function App() {
 
             {/* Region Pie + Bar */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+              <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
                 <h2 className="text-sm font-semibold text-gray-700 mb-3">สัดส่วนตามภาค — Team 5</h2>
                 <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
@@ -1301,7 +1338,7 @@ export default function App() {
               </div>
 
               {/* Compare bar Team5 */}
-              <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+              <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
                 <h2 className="text-sm font-semibold text-gray-700 mb-3">
                   {filter==="both"?"ม.ค. vs ก.พ.":monthLabel?.label} — {regionFilter}
                 </h2>
@@ -1336,7 +1373,7 @@ export default function App() {
             </div>
 
             {/* Ranking Table */}
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                   <Users size={15} className="text-emerald-600"/>
@@ -1462,7 +1499,7 @@ export default function App() {
                 </div>
 
                 {/* Team total bar chart by period */}
-                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
                   <h2 className="text-sm font-semibold text-gray-700 mb-4">
                     📊 ยอดรวม Team 5 — {COMPARE_PERIODS[compareMode].label}
                   </h2>
@@ -1516,7 +1553,7 @@ export default function App() {
 
                 {/* Individual line trend */}
                 {selectedMember !== "all" && (
-                  <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                  <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
                     {(() => {
                       const info = TEAM5_INFO.find(m=>m.code===selectedMember)!;
                       return (
@@ -1564,7 +1601,7 @@ export default function App() {
 
                 {/* All members stacked/grouped bar */}
                 {selectedMember === "all" && (
-                  <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                  <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
                     <h2 className="text-sm font-semibold text-gray-700 mb-4">
                       📊 ยอดรายคน ทุกคน — {COMPARE_PERIODS[compareMode].label}
                     </h2>
@@ -1652,7 +1689,7 @@ export default function App() {
                   ))}
                 </div>
 
-                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-sm font-semibold text-gray-700">🚦 Traffic Light — Fee vs Target ({monthLabel?.label || "ก.ย. 2569"})</h2>
                     <span className="text-xs text-gray-400">เรียงตาม % Target</span>
@@ -1688,7 +1725,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
                   <h2 className="text-sm font-semibold text-gray-700 mb-4">📈 ยอดขาย + ค่าเฉลี่ยรายคน (ทุกเดือน)</h2>
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs">
@@ -1765,7 +1802,7 @@ export default function App() {
                   const lightBg = light==="green"?"bg-emerald-100 text-emerald-700":light==="yellow"?"bg-amber-100 text-amber-700":light==="none"?"bg-gray-100 text-gray-500":"bg-red-100 text-red-700";
                   return (
                     <div className="space-y-5">
-                      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                      <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
                         <div className="flex flex-wrap gap-4 items-start">
                           <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-xl"
                             style={{backgroundColor:REGION_COLORS[info.region]||"#6366f1"}}>
@@ -1802,7 +1839,7 @@ export default function App() {
                         </div>
                       </div>
 
-                      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                      <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
                         <h2 className="text-sm font-semibold text-gray-700 mb-4">📈 ยอดรายเดือน</h2>
                         <ResponsiveContainer width="100%" height={220}>
                           <BarChart data={monthVols} margin={{left:10,right:10}}>
@@ -1827,7 +1864,7 @@ export default function App() {
                         </div>
                       </div>
 
-                      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                      <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
                         <h2 className="text-sm font-semibold text-gray-700 mb-4">🏅 Rank ในทีม รายเดือน</h2>
                         <div className="flex flex-wrap gap-2">
                           {monthRanks.map(m=>(
@@ -1846,7 +1883,7 @@ export default function App() {
                       </div>
 
                       {info.target > 0 && (
-                        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                        <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
                           <h2 className="text-sm font-semibold text-gray-700 mb-4">🎯 Fee vs Target {monthLabel?.label || "ก.ย. 2569"}</h2>
                           <div className="relative h-8 bg-gray-100 rounded-full overflow-hidden">
                             <div className={`h-8 rounded-full flex items-center justify-end pr-3 ${
@@ -1895,7 +1932,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
                   <h2 className="text-sm font-semibold text-gray-700 mb-1">📊 ยอดรวม Team 5</h2>
                   <div className="text-xs text-gray-400 mb-4">
                     รวม: ฿{fmt(cmpMonths.reduce((s,mk)=>s+(cmpTeamTotals[mk]||0),0))} ·
@@ -1919,7 +1956,7 @@ export default function App() {
                   </ResponsiveContainer>
                 </div>
 
-                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
                   <h2 className="text-sm font-semibold text-gray-700 mb-4">👤 ยอดรายคน</h2>
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs">
@@ -1994,7 +2031,7 @@ export default function App() {
                 </div>
 
                 {/* Period compare MoM/QoQ/HoH/YoY */}
-                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
                   <div className="flex flex-wrap items-center gap-3 mb-4">
                     <h2 className="text-sm font-semibold text-gray-700">⚖️ เปรียบเทียบช่วงเวลา</h2>
                     {([
