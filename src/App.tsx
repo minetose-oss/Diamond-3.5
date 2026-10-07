@@ -525,19 +525,46 @@ export default function App() {
   const [cmpMonths, setCmpMonths] = useState<string[]>(["jan","feb"]);
   // profile page
   const [profileCode, setProfileCode] = useState<string>("");
-  // UI preferences
-  const [darkMode, setDarkMode] = useState<boolean>(false);
-  const [theme, setTheme] = useState<Theme>("indigo");
+  // UI preferences (persisted in localStorage)
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    try { return localStorage.getItem("ui-darkMode") === "true"; } catch { return false; }
+  });
+  const [theme, setTheme] = useState<Theme>(() => {
+    try {
+      const saved = localStorage.getItem("ui-theme");
+      if (saved && ["indigo","rose","emerald","gold"].includes(saved)) return saved as Theme;
+    } catch {}
+    return "indigo";
+  });
+  const [layout, setLayout] = useState<"top" | "sidebar">(() => {
+    try {
+      const saved = localStorage.getItem("ui-layout");
+      if (saved === "sidebar" || saved === "top") return saved;
+    } catch {}
+    return "top";
+  });
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false); // mobile
 
-  // Apply dark mode to html
+  // Apply dark mode to html + persist
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
     }
+    try { localStorage.setItem("ui-darkMode", String(darkMode)); } catch {}
   }, [darkMode]);
+
+  // Persist theme
+  useEffect(() => {
+    try { localStorage.setItem("ui-theme", theme); } catch {}
+  }, [theme]);
+
+  // Persist layout
+  useEffect(() => {
+    try { localStorage.setItem("ui-layout", layout); } catch {}
+  }, [layout]);
 
   // monthly totals
   const monthTotals = useMemo(() =>
@@ -947,6 +974,27 @@ export default function App() {
               </div>
             </div>
 
+            {/* Layout picker */}
+            <div>
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2 block">📐 เลย์เอาต์</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => setLayout("top")}
+                  className={`px-3 py-3 rounded-xl border-2 transition-all ${
+                    layout === "top" ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30" : "border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800"
+                  }`}>
+                  <div className="text-2xl mb-1">📊</div>
+                  <div className="text-xs font-semibold text-gray-700 dark:text-gray-200">Tabs ด้านบน</div>
+                </button>
+                <button onClick={() => setLayout("sidebar")}
+                  className={`px-3 py-3 rounded-xl border-2 transition-all ${
+                    layout === "sidebar" ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30" : "border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800"
+                  }`}>
+                  <div className="text-2xl mb-1">📂</div>
+                  <div className="text-xs font-semibold text-gray-700 dark:text-gray-200">Sidebar ซ้าย</div>
+                </button>
+              </div>
+            </div>
+
             <div className="text-xs text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-200 dark:border-slate-700">
               <p>💡 เคล็ดลับ: ธีมจะถูกบันทึกไว้ในเซสชันนี้</p>
             </div>
@@ -954,7 +1002,72 @@ export default function App() {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-6 py-6 space-y-5">
+      {/* Mobile sidebar backdrop */}
+      {layout === "sidebar" && sidebarOpen && (
+        <div className="fixed inset-0 bg-black/40 z-40 md:hidden" onClick={() => setSidebarOpen(false)}></div>
+      )}
+
+      <div className={`${layout === "sidebar" ? "md:flex md:gap-4" : ""} max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-6`}>
+        {/* Sidebar Layout */}
+        {layout === "sidebar" && (
+          <aside className={`fixed md:sticky top-0 left-0 z-40 md:z-0 h-screen md:h-auto w-64 md:w-56 bg-white/95 dark:bg-slate-800/95 backdrop-blur md:rounded-2xl shadow-lg md:shadow-md border-r md:border border-gray-100/80 p-4 transition-transform duration-300 ${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          } overflow-y-auto`}>
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100 dark:border-slate-700">
+              <div className="diamond-icon w-8 h-8"></div>
+              <div>
+                <div className="text-[10px] text-gray-400 uppercase font-bold">Diamond 3.5</div>
+                <div className="text-sm font-bold text-gray-800 dark:text-white">เมนู</div>
+              </div>
+              <button onClick={() => setSidebarOpen(false)} className="md:hidden ml-auto w-6 h-6 rounded bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+                <X size={12}/>
+              </button>
+            </div>
+            <nav className="space-y-1">
+              {TABS.map(tt => (
+                <button key={tt.key} onClick={() => { setTab(tt.key); setSidebarOpen(false); }}
+                  className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 ${
+                    tab === tt.key
+                      ? `bg-gradient-to-r ${t.gradient} text-white shadow-md`
+                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700"
+                  }`}>
+                  <span className="text-base">{tt.label.split(' ')[0]}</span>
+                  <span>{tt.label.split(' ').slice(1).join(' ')}</span>
+                </button>
+              ))}
+            </nav>
+            <div className="mt-6 pt-4 border-t border-gray-100 dark:border-slate-700">
+              <div className="text-[10px] uppercase tracking-wider text-gray-400 font-bold mb-2">⚡ Quick Stats</div>
+              <div className="space-y-2 text-xs">
+                <div className="flex justify-between"><span className="text-gray-500">Total</span><span className="font-bold text-gray-700 dark:text-gray-200">฿{fmt(grandTotal)}</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">IC</span><span className="font-bold text-gray-700 dark:text-gray-200">{Object.keys(RAW.sep || {}).length}</span></div>
+              </div>
+            </div>
+          </aside>
+        )}
+
+        <div className="flex-1 space-y-4 md:space-y-5 min-w-0">
+          {/* Mobile sidebar toggle button */}
+          {layout === "sidebar" && (
+            <button onClick={() => setSidebarOpen(true)}
+              className="md:hidden w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 shadow-md text-sm font-semibold text-gray-700 dark:text-gray-200">
+              <span>☰</span> เมนู
+            </button>
+          )}
+
+          {/* Top layout: tabs */}
+          {layout === "top" && (
+            <div className="bg-white/80 backdrop-blur rounded-2xl p-1.5 shadow-md border border-white/60 inline-flex gap-1 flex-wrap">
+              {TABS.map(t=>(
+                <button key={t.key} onClick={()=>setTab(t.key)}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                    tab===t.key
+                      ? t.key==="team5"?"bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md":"bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md"
+                      : "text-gray-500 hover:bg-gray-100"
+                  }`}>{t.label}</button>
+              ))}
+            </div>
+          )}
         {/* KPI */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 stagger">
           <div className={`kpi-card rounded-2xl p-5 shadow-md bg-gradient-to-br ${t.gradient} text-white`}>
@@ -1014,18 +1127,6 @@ export default function App() {
                   }`}>{f.label}</button>
               ))}
             </div>
-          ))}
-        </div>
-
-        {/* Tabs */}
-        <div className="bg-white/80 backdrop-blur rounded-2xl p-1.5 shadow-md border border-white/60 inline-flex gap-1 flex-wrap">
-          {TABS.map(t=>(
-            <button key={t.key} onClick={()=>setTab(t.key)}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                tab===t.key
-                  ? t.key==="team5"?"bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md":"bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md"
-                  : "text-gray-500 hover:bg-gray-100"
-              }`}>{t.label}</button>
           ))}
         </div>
 
@@ -2217,7 +2318,8 @@ export default function App() {
         <div className="text-center text-xs text-gray-400 pb-4">
           Globlex Securities Co., Ltd. · #Wealth 4 · เม.ย. 2568 – ก.ย. 2569
         </div>
-      </div>
+        </div>{/* close flex-1 */}
+      </div>{/* close max-w-7xl / md:flex */}
     </div>
   );
 }
