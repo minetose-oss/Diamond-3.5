@@ -352,6 +352,37 @@ const RAW: Record<string, Record<string, number>> = {
     "6_A054": 0, "5_A078": 0, "5_8635": 0, "5_8631": 0, "5_8610": 0,
     "5_8562": 0, "5_8513": 0,
   },
+  oct: {
+    "7_8616": 52949170.78, "1_8658": 47148408.23, "4_8649": 21000000.00,
+    "3_8653": 20888973.62, "8_8570": 19893262.30, "5_8637": 19530500.00,
+    "5_8630": 19176318.73, "5_8638": 18500000.00, "5_8546": 16509594.30,
+    "1_8542": 15878923.12, "2_8654": 14804252.61, "6_8622": 14604677.33,
+    "6_8475": 14600000.00, "8_8576": 13633398.54, "6_A083": 12440000.00,
+    "6_8474": 11617682.99, "5_8493": 11580039.02, "6_A082": 10950707.03,
+    "4_8506": 10800000.00, "4_8500": 10194166.54, "8_8611": 8577817.85,
+    "2_8553": 7771789.66, "3_8650": 7770365.83, "5_8632": 7179361.84,
+    "8660": 7117025.33, "4_8577": 6710140.62, "2_8617": 6546988.70,
+    "1_8656": 6238335.01, "2_8619": 6223803.25, "5_8491": 6100120.80,
+    "5_8585": 6000000.00, "4_8485": 5905200.07, "3_8621": 5856446.60,
+    "8_8514": 4956948.56, "1_8647": 4770828.90, "5_8628": 4300000.00,
+    "5_8639": 4295183.00, "9_8648": 4200000.00, "9_8479": 4200000.00,
+    "1_8589": 4080000.00, "4_8483": 4006665.50, "5_8645": 4000000.00,
+    "6_8523": 3796159.37, "5_8636": 2990327.25, "5_8644": 2732143.52,
+    "7_8530": 2535000.00, "8_8624": 2383868.00, "6_8620": 2250000.00,
+    "5_8640": 2200000.00, "5_8515": 2100000.00, "6_8524": 2044175.94,
+    "5_8629": 2000000.00, "10_8652": 1964399.71, "7_8537": 1905346.00,
+    "6_8490": 1800000.00, "5_8633": 1696231.14, "4_8612": 1550006.04,
+    "5_8643": 1421591.85, "9_8499": 1000000.00, "10_8473": 900000.00,
+    "1_8492": 805000.00, "9_8497": 703000.00, "9_8498": 700911.60,
+    "1_8508": 593060.36, "4_A091": 603134.58, "2_8496": 360000.00,
+    "10_8484": 340000.00, "5_8634": 200000.00, "1_A089": 200000.00,
+    "1_8507": 150000.00, "5_8635": 100000.00, "1_8470": 80500.00,
+    "5_8631": 46764.36, "5_8567": 11200.00, "7_A056": 165000.00,
+    "5_A057": 140000.00, "2_A087": 120000.00, "7_A069": 55000.00,
+    "8_8472": 0, "5_8610": 0, "5_8590": 0, "5_8566": 0, "5_8562": 0,
+    "5_8513": 0, "A012": 0, "6_A054": 0, "A077": 0, "5_A078": 0,
+    "7_A059": 0, "7_A001": 0, "4_A092": 0,
+  },
 };
 
 // ─── TEAM 5 MEMBER INFO ──────────────────────────────────────────────────────
@@ -434,6 +465,7 @@ const MONTHS = [
   { key:"jul",   label:"กรกฎาคม 2569",    short:"ก.ค.",  range:"1–31 ก.ค. 2569",  year:2026 },
   { key:"aug",   label:"สิงหาคม 2569",    short:"ส.ค.",  range:"1–31 ส.ค. 2569",  year:2026 },
   { key:"sep",   label:"กันยายน 2569",    short:"ก.ย.",  range:"1–30 ก.ย. 2569",  year:2026 },
+  { key:"oct",   label:"ตุลาคม 2569",     short:"ต.ค.",  range:"1–30 ต.ค. 2569",  year:2026 },
 ];
 
 const TEAM_COLORS: Record<string, string> = {
@@ -527,7 +559,7 @@ const THEMES: Record<Theme, {name: string; gradient: string; hero: string; light
 
 export default function App() {
   const [tab, setTab] = useState<Tab>("overview");
-  const [filter, setFilter] = useState<string>("sep");
+  const [filter, setFilter] = useState<string>("oct");
   const [regionFilter, setRegionFilter] = useState<string>("ทั้งหมด");
   const [t5SubTab, setT5SubTab] = useState<T5SubTab>("table");
   const [compareMode, setCompareMode] = useState<CompareMode>("mom");
@@ -810,6 +842,9 @@ export default function App() {
         { name: "Q3/68 (ก.ค–ก.ย)",   keys:["jul25","aug25","sep25"] },
         { name: "Q4/68 (ต.ค–ธ.ค)",   keys:["oct25","nov25","dec25"] },
         { name: "Q1/69 (ม.ค–ก.พ)",   keys:["jan","feb"] },
+        { name: "Q2/69 (มี.ค–พ.ค)",  keys:["mar","apr","may"] },
+        { name: "Q3/69 (มิ.ย–ก.ค)",  keys:["jun","jul","aug"] },
+        { name: "Q4/69 (ก.ย–ต.ค)",  keys:["sep","oct"] },
       ],
     },
     hoh: {
@@ -817,13 +852,15 @@ export default function App() {
       periods: [
         { name: "H1/68 (เม.ย–ก.ย)", keys:["apr25","may25","jun25","jul25","aug25","sep25"] },
         { name: "H2/68 (ต.ค–ธ.ค+Q1/69)", keys:["oct25","nov25","dec25","jan","feb"] },
+        { name: "H1/69 (มี.ค–ก.ค)", keys:["mar","apr","may","jun","jul","aug"] },
+        { name: "H2/69 (ก.ย.–ต.ค.)", keys:["sep","oct"] },
       ],
     },
     yoy: {
       label: "Year-over-Year",
       periods: [
         { name: "ปี 2568 (เม.ย–ธ.ค)", keys:["apr25","may25","jun25","jul25","aug25","sep25","oct25","nov25","dec25"] },
-        { name: "ปี 2569 (ม.ค–ก.พ)",  keys:["jan","feb"] },
+        { name: "ปี 2569 (ม.ค–ต.ค.)", keys:["jan","feb","mar","apr","may","jun","jul","aug","sep","oct"] },
       ],
     },
   };
@@ -1047,7 +1084,7 @@ export default function App() {
                 </span>
               </div>
               <h1 className="text-2xl font-bold tracking-tight">SUB/SWI High Fee Volume</h1>
-              <p className="text-white/80 text-sm mt-1">💎 เม.ย. 2568 – ก.ย. 2569 · 16 เดือน</p>
+              <p className="text-white/80 text-sm mt-1">💎 เม.ย. 2568 – ต.ค. 2569 · 19 เดือน</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -1307,7 +1344,7 @@ export default function App() {
               <DollarSign size={18} className="text-white/80"/>
             </div>
             <div className="text-2xl font-bold tracking-tight">฿{fmt(MONTHS.filter(m=>m.year===2026).reduce((s,m)=>s+(monthTotals[m.key]||0),0))}</div>
-            <div className="text-emerald-100 text-xs mt-1">ม.ค.–ก.ย. 2569</div>
+            <div className="text-emerald-100 text-xs mt-1">ม.ค.–ต.ค. 2569</div>
           </div>
           <div className="kpi-card rounded-2xl p-5 shadow-md bg-gradient-to-br from-amber-500 to-orange-600 text-white">
             <div className="flex items-start justify-between mb-3">
@@ -1389,7 +1426,7 @@ export default function App() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
-                <h2 className="section-title text-sm font-bold text-gray-800 mb-4">📈 แนวโน้ม Volume รายเดือน <span className="text-xs font-normal text-gray-400 ml-1">เม.ย. 2568 – ก.ย. 2569</span></h2>
+                <h2 className="section-title text-sm font-bold text-gray-800 mb-4">📈 แนวโน้ม Volume รายเดือน <span className="text-xs font-normal text-gray-400 ml-1">เม.ย. 2568 – ต.ค. 2569</span></h2>
                 <ResponsiveContainer width="100%" height={210}>
                   <BarChart data={monthlyTrend}>                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
                     <XAxis dataKey="month" tick={{fontSize:11}}/>
@@ -1530,7 +1567,7 @@ export default function App() {
                   </AreaChart>
                 </ResponsiveContainer>
               <div className="text-center mt-3 text-xs text-gray-500">
-                ยอดรวมสะสม 16 เดือน: <strong className="text-indigo-600 font-bold">฿{fmt(MONTHS.reduce((s,m)=>s+(monthTotals[m.key]||0),0))}</strong>
+                ยอดรวมสะสม 19 เดือน: <strong className="text-indigo-600 font-bold">฿{fmt(MONTHS.reduce((s,m)=>s+(monthTotals[m.key]||0),0))}</strong>
               </div>
             </div>
 
@@ -1821,7 +1858,7 @@ export default function App() {
             {/* 4. TREND LINE */}
             <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
               <h2 className="text-sm font-semibold text-gray-700 mb-4">
-                📈 Trend Line — Top 5 Team 5 (เม.ย. 2568 – ก.ย. 2569)
+                📈 Trend Line — Top 5 Team 5 (เม.ย. 2568 – ต.ค. 2569)
               </h2>
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={trendData} margin={{left:10,right:20}}>
@@ -2767,7 +2804,7 @@ export default function App() {
         )}
 
         <div className="text-center text-xs text-gray-400 pb-4">
-          Globlex Securities Co., Ltd. · #Wealth 4 · เม.ย. 2568 – ก.ย. 2569
+          Globlex Securities Co., Ltd. · #Wealth 4 · เม.ย. 2568 – ต.ค. 2569
         </div>
 
         {/* ══ CALENDAR HEATMAP ══ */}
@@ -2887,7 +2924,7 @@ export default function App() {
                   <div className="flex items-start gap-3">
                     <TrendingUp size={18} className="text-amber-600 mt-0.5 shrink-0"/>
                     <div className="text-sm text-gray-700">
-                      <strong>Best Month:</strong> {bestMonth.label} ทำยอดสูงสุดในรอบ 16 เดือน (฿{fmt(bestMonth.vol)})
+                      <strong>Best Month:</strong> {bestMonth.label} ทำยอดสูงสุดในรอบ 19 เดือน (฿{fmt(bestMonth.vol)})
                     </div>
                   </div>
                 </div>
@@ -2940,7 +2977,7 @@ export default function App() {
                       </div>
                       <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
                         <div>
-                          <div className="text-gray-400">รวม 16 เดือน</div>
+                          <div className="text-gray-400">รวม 19 เดือน</div>
                           <div className="font-bold text-gray-800">฿{fmt(total)}</div>
                         </div>
                         <div>
