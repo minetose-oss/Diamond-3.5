@@ -646,8 +646,20 @@ export default function App() {
   const selectedKeys = useMemo((): string[] => {
     if (filter === "all25") return MONTHS.filter(m=>m.year===2025).map(m=>m.key);
     if (filter === "all26") return MONTHS.filter(m=>m.year===2026).map(m=>m.key);
+    if (filter === "both") return ["jan","feb"];
     return [filter];
   }, [filter]);
+
+  // Volume for a given code across the selected filter (handles single month + year ranges)
+  const volFor = useMemo(() => {
+    const acc: Record<string, number> = {};
+    selectedKeys.forEach(k => {
+      const d = RAW[k] || {};
+      for (const code of Object.keys(d)) acc[code] = (acc[code] || 0) + (d[code] || 0);
+    });
+    return acc;
+  }, [selectedKeys]);
+  const volOf = (code: string) => volFor[code] || 0;
 
   // combined volume for selected months per code
   const selectedVolByCode = useMemo(() => {
@@ -830,6 +842,13 @@ export default function App() {
 
   const regions = ["ทั้งหมด","เหนือ","อีสาน","กลาง","ใต้","ตะวันออก"];
   const monthLabel = MONTHS.find(m=>m.key===filter);
+  // Label for the current selection (works for single month + year ranges)
+  const selectionLabel = monthLabel
+    ? monthLabel.short
+    : (filter === "all25" ? "ปี 2568" : filter === "all26" ? "ปี 2569" : filter === "both" ? "2 เดือน" : "—");
+  const selectionFullLabel = monthLabel
+    ? monthLabel.label
+    : (filter === "all25" ? "รวมปี 2568" : filter === "all26" ? "รวมปี 2569" : filter === "both" ? "ม.ค. vs ก.พ." : filter);
 
   // ── Team5 Compare Data ──
   // Define periods for each compare mode
@@ -913,7 +932,10 @@ export default function App() {
 
   // ── Target Tracker data ──
   // Use selected month (filter) as "current" for traffic light
-  const TRACKER_MONTH = filter === "all25" || filter === "all26" ? "jul" : filter;
+  // For year-range filters, use the latest month in that range as the "current" month
+  const TRACKER_MONTH = (filter === "all25" || filter === "all26")
+    ? (MONTHS.filter(m => m.year === (filter === "all25" ? 2025 : 2026)).slice(-1)[0]?.key || "oct")
+    : filter;
   const trackerData = useMemo(() => {
     return TEAM5_INFO.map(m => {
       // per-month vols for avg
@@ -963,7 +985,7 @@ export default function App() {
     const allTotal = active.reduce((s,m)=>s+m.vol,0);
     const avgVol = active.length > 0 ? allTotal/active.length : 0;
     const best = monthVols.reduce((mx,m)=>m.vol>mx.vol?m:mx, monthVols[0]);
-    const curVol = RAW[filter]?.[info.code]||0;
+    const curVol = volOf(info.code);
     const curFee = toFee(curVol);
     const targetPct = info.target>0 ? (curFee/info.target)*100 : null;
     // rank each month
@@ -1326,7 +1348,7 @@ export default function App() {
               <DollarSign size={18} className="text-white/80"/>
             </div>
             <div className="text-2xl font-bold tracking-tight">฿{fmt(grandTotal)}</div>
-            <div className="text-white/80 text-xs mt-1">{monthLabel?.range || (filter==="all25"?"ปี 2568":filter==="all26"?"ปี 2569":"")}</div>
+            <div className="text-white/80 text-xs mt-1">{monthLabel?.range || (filter==="all25"?"เม.ย.–ธ.ค. 2568":filter==="all26"?"ม.ค.–ต.ค. 2569":"")}</div>
             {diffPct!==null && (
               <div className="text-xs mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20">
                 {diffPct>0?"↑":diffPct<0?"↓":"•"} {Math.abs(diffPct).toFixed(1)}%
@@ -1478,7 +1500,7 @@ export default function App() {
                 <h2 className="section-title text-sm font-bold text-gray-800 mb-1">
                   🥧 สัดส่วนตาม Team
                   <span className="ml-2 text-xs font-normal text-indigo-500">
-                    ({monthLabel?.short || (filter==="all25"?"ปี 2568":"ปี 2569")})
+                    ({selectionLabel})
                   </span>
                 </h2>
                 <p className="text-xs text-gray-400 mb-3">หน่วย: บาท (฿) · คลิก legend เพื่อซ่อน/แสดง</p>
@@ -1561,7 +1583,7 @@ export default function App() {
               </div>
 
               <div className="md:col-span-2 card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
-                <h2 className="section-title text-sm font-bold text-gray-800 mb-1">🏆 Top 10 — {monthLabel?.label || (filter==="all25"?"รวมปี 2568":"รวมปี 2569")}</h2>
+                <h2 className="section-title text-sm font-bold text-gray-800 mb-1">🏆 Top 10 — {selectionFullLabel}</h2>
                 <p className="text-xs text-gray-400 mb-4">หน่วย: บาท (฿) · ชื่อและยอดแสดงในแท่ง</p>
                 <ResponsiveContainer width="100%" height={340}>
                   <BarChart data={top10} layout="vertical" margin={{top:4,right:16,left:4,bottom:4}}>
@@ -1643,7 +1665,7 @@ export default function App() {
                   };
                   TEAM5_INFO.forEach(m => {
                     const r = byRegion[m.region] || byRegion["กลาง"];
-                    const vol = RAW[filter]?.[m.code] || 0;
+                    const vol = volOf(m.code);
                     r.count += vol > 0 ? 1 : 0;
                     r.total += vol;
                     r.members.push(m);
@@ -1670,13 +1692,13 @@ export default function App() {
                           <div className={`h-full bg-gradient-to-r ${cfg.bg} rounded-full transition-all duration-700`} style={{width: `${Math.max(5, intensity * 100)}%`}}></div>
                         </div>
                         <div className="mt-3 space-y-1">
-                          {r.members.filter(m => (RAW[filter]?.[m.code]||0) > 0).slice(0, 3).map(m => (
+                          {r.members.filter(m => volOf(m.code) > 0).slice(0, 3).map(m => (
                             <div key={m.code} className="flex items-center justify-between text-xs">
                               <span className="text-gray-600 truncate">{m.name}</span>
-                              <span className="font-mono text-gray-700">฿{fmt(RAW[filter]?.[m.code]||0)}</span>
+                              <span className="font-mono text-gray-700">฿{fmt(volOf(m.code))}</span>
                             </div>
                           ))}
-                          {r.members.filter(m => (RAW[filter]?.[m.code]||0) > 0).length === 0 && (
+                          {r.members.filter(m => volOf(m.code) > 0).length === 0 && (
                             <div className="text-xs text-gray-400 italic">ไม่มียอดขายในเดือนนี้</div>
                           )}
                         </div>
@@ -1705,7 +1727,7 @@ export default function App() {
             <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
               <h2 className="text-sm font-semibold text-gray-700 mb-6 flex items-center gap-2">
                 <Trophy size={15} className="text-amber-500"/> Leaderboard Podium — Team 5
-                <span className="text-xs font-normal text-gray-400 ml-1">({monthLabel?.short || (filter==="all25"?"ปี 2568":"ปี 2569")})</span>
+                <span className="text-xs font-normal text-gray-400 ml-1">({selectionLabel})</span>
               </h2>
               <div className="flex items-end justify-center gap-3 md:gap-4 mb-6 px-2">
                 {/* 2nd place */}
@@ -1874,7 +1896,7 @@ export default function App() {
             <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
               <h2 className="section-title text-sm font-bold text-gray-800 mb-1">
                 🗂️ Treemap — สัดส่วน Volume Team 5
-                <span className="ml-2 text-xs font-normal text-gray-400">({monthLabel?.short || (filter==="all25"?"ปี 2568":"ปี 2569")})</span>
+                <span className="ml-2 text-xs font-normal text-gray-400">({selectionLabel})</span>
               </h2>
               <p className="text-xs text-gray-400 mb-4">ขนาดพื้นที่ = ยอดขาย · สี = ภูมิภาค</p>
               <ResponsiveContainer width="100%" height={320}>
@@ -1957,7 +1979,7 @@ export default function App() {
           <div className="space-y-5">
             <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
               <h2 className="text-sm font-semibold text-gray-700 mb-4">
-                Volume รายทีม — {monthLabel?.label || (filter==="all25"?"รวมปี 2568":"รวมปี 2569")}
+                Volume รายทีม — {selectionFullLabel}
               </h2>
               <ResponsiveContainer width="100%" height={270}>
                 <BarChart data={teamSingle} layout="vertical" margin={{left:10,right:30}}>
@@ -3039,7 +3061,7 @@ export default function App() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filteredMembers.map(m => {
                   const total = MONTHS.reduce((s,mo)=>s+(RAW[mo.key]?.[m.code]||0),0);
-                  const cur = RAW[filter]?.[m.code] || 0;
+                  const cur = volOf(m.code);
                   const isFav = favorites.includes(m.code);
                   return (
                     <div key={m.code} className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 border border-gray-100 hover:shadow-md transition-all">
@@ -3057,12 +3079,12 @@ export default function App() {
                         </button>
                       </div>
                       <div className="grid grid-cols-2 gap-2 mt-3 text-xs">
-                        <div>
-                          <div className="text-gray-400">รวม 19 เดือน</div>
+                        <div className="bg-white/70 rounded-lg px-2 py-1.5">
+                          <div className="text-gray-400 text-[10px]">รวม {MONTHS.length} เดือน</div>
                           <div className="font-bold text-gray-800">฿{fmt(total)}</div>
                         </div>
-                        <div>
-                          <div className="text-gray-400">{monthLabel?.short || "—"}</div>
+                        <div className="bg-indigo-50 rounded-lg px-2 py-1.5">
+                          <div className="text-indigo-400 text-[10px]">{selectionLabel}</div>
                           <div className="font-bold text-indigo-600">฿{fmt(cur)}</div>
                         </div>
                       </div>
