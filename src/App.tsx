@@ -4,7 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
   AreaChart, Area,
-  LineChart, Line, Treemap,
+  LineChart, Line, Treemap, ReferenceLine,
 } from "recharts";
 import { TrendingUp, TrendingDown, DollarSign, Target, Award, MapPin, Users, BarChart2, Trophy, Search, Download, RefreshCw, Heart, Calendar, Sparkles, Eye, Layers, Activity } from "lucide-react";
 
@@ -673,7 +673,10 @@ export default function App() {
   // top10 for selected filter
   const top10 = useMemo(()=>
     Object.entries(selectedVolByCode)
-      .map(([code, vol]) => ({ code, vol }))
+      .map(([code, vol]) => {
+        const info = TEAM5_INFO.find(m=>m.code===code);
+        return { code, vol, name: info?.name || code };
+      })
       .sort((a,b)=>b.vol-a.vol).slice(0,10),
   [selectedVolByCode]);
 
@@ -1341,10 +1344,21 @@ export default function App() {
           <div className="kpi-card rounded-2xl p-5 shadow-md bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
             <div className="flex items-start justify-between mb-3">
               <span className="text-xs font-semibold uppercase tracking-wider text-emerald-100">📅 ปี 2569</span>
-              <DollarSign size={18} className="text-white/80"/>
+              <TrendingUp size={18} className="text-white/80"/>
             </div>
             <div className="text-2xl font-bold tracking-tight">฿{fmt(MONTHS.filter(m=>m.year===2026).reduce((s,m)=>s+(monthTotals[m.key]||0),0))}</div>
-            <div className="text-emerald-100 text-xs mt-1">ม.ค.–ต.ค. 2569</div>
+            <div className="text-emerald-100 text-xs mt-1">ม.ค.–ต.ค. 2569 (10 เดือน)</div>
+            {(() => {
+              const y25 = MONTHS.filter(m=>m.year===2025).reduce((s,m)=>s+(monthTotals[m.key]||0),0);
+              const y26 = MONTHS.filter(m=>m.year===2026).reduce((s,m)=>s+(monthTotals[m.key]||0),0);
+              const avg25 = y25/9, avg26 = y26/10;
+              const g = ((avg26-avg25)/avg25)*100;
+              return (
+                <div className="text-xs mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 font-semibold">
+                  {g>=0?"↑":"↓"} เฉลี่ย/เดือน {Math.abs(g).toFixed(1)}% vs ปี 2568
+                </div>
+              );
+            })()}
           </div>
           <div className="kpi-card rounded-2xl p-5 shadow-md bg-gradient-to-br from-amber-500 to-orange-600 text-white">
             <div className="flex items-start justify-between mb-3">
@@ -1426,49 +1440,75 @@ export default function App() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
-                <h2 className="section-title text-sm font-bold text-gray-800 mb-4">📈 แนวโน้ม Volume รายเดือน <span className="text-xs font-normal text-gray-400 ml-1">เม.ย. 2568 – ต.ค. 2569</span></h2>
-                <ResponsiveContainer width="100%" height={210}>
-                  <BarChart data={monthlyTrend}>                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
-                    <XAxis dataKey="month" tick={{fontSize:11}}/>
-                    <YAxis tick={{fontSize:10}} tickFormatter={fmt}/>
-                    <Tooltip formatter={(v:number)=>[`฿${v.toLocaleString()}`,"Volume"]}/>
-                    <Bar dataKey="volume" radius={[6,6,0,0]}>
-                      {monthlyTrend.map((m,i)=>(
-                        <Cell key={i}
-                          fill={m.year===2025 ? "#a78bfa" : "#6366f1"}
-                          opacity={filter===MONTHS[i]?.key ? 1 : 0.6}
-                        />
-                      ))}
+                <h2 className="section-title text-sm font-bold text-gray-800 mb-1">📈 แนวโน้ม Volume รายเดือน <span className="text-xs font-normal text-gray-400 ml-1">เม.ย. 2568 – ต.ค. 2569</span></h2>
+                <p className="text-xs text-gray-400 mb-4">หน่วย: บาท (฿) · แท่งเข้ม = ปี 2569 · เส้นประ = เดือนที่เลือก</p>
+                <ResponsiveContainer width="100%" height={240}>
+                  <BarChart data={monthlyTrend} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="0" stroke="#f1f5f9" vertical={false}/>
+                    <XAxis dataKey="month" tick={{fontSize:11, fill:"#64748b"}} tickLine={false} axisLine={{stroke:"#e2e8f0"}} dy={4}/>
+                    <YAxis tick={{fontSize:10, fill:"#94a3b8"}} tickFormatter={(v:number)=>`฿${fmt(v)}`} tickLine={false} axisLine={false} width={56}/>
+                    <Tooltip
+                      contentStyle={{ borderRadius:12, border:"1px solid #e2e8f0", boxShadow:"0 8px 24px rgba(0,0,0,0.08)", padding:"10px 14px" }}
+                      labelStyle={{ fontWeight:700, fontSize:13, marginBottom:4, color:"#0f172a" }}
+                      formatter={(v:number)=>[`฿${v.toLocaleString(undefined,{maximumFractionDigits:0})}`, "Volume"]}
+                    />
+                    <Bar dataKey="volume" radius={[6,6,0,0]} maxBarSize={40}>
+                      {monthlyTrend.map((m,i)=>{
+                        const isSel = filter===MONTHS[i]?.key;
+                        return (
+                          <Cell key={i}
+                            fill={m.year===2025 ? "#c4b5fd" : "#4f46e5"}
+                            opacity={filter==="all25"||filter==="all26" ? 1 : (isSel ? 1 : 0.42)}
+                            stroke={isSel ? "#1e1b4b" : "none"}
+                            strokeWidth={isSel ? 2 : 0}
+                          />
+                        );
+                      })}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
-                <div className="flex justify-center gap-4 mt-3 text-xs text-gray-500">
-                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-violet-400 inline-block"/>ปี 2568</span>
-                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-indigo-600 inline-block"/>ปี 2569</span>
+                <div className="flex justify-center gap-5 mt-3 text-xs text-gray-500">
+                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-[#c4b5fd] inline-block"/>ปี 2568</span>
+                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-[#4f46e5] inline-block"/>ปี 2569</span>
+                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm border-2 border-[#1e1b4b] bg-[#4f46e5] inline-block"/>เดือนที่เลือก</span>
                 </div>
               </div>
 
               <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
-                <h2 className="section-title text-sm font-bold text-gray-800 mb-2">
+                <h2 className="section-title text-sm font-bold text-gray-800 mb-1">
                   🥧 สัดส่วนตาม Team
                   <span className="ml-2 text-xs font-normal text-indigo-500">
                     ({monthLabel?.short || (filter==="all25"?"ปี 2568":"ปี 2569")})
                   </span>
                 </h2>
-                <ResponsiveContainer width="100%" height={210}>
+                <p className="text-xs text-gray-400 mb-3">หน่วย: บาท (฿) · คลิก legend เพื่อซ่อน/แสดง</p>
+                <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
-                    <Pie data={teamSingle} dataKey="volume" nameKey="name" cx="50%" cy="50%" outerRadius={95} labelLine={false}
+                    <Pie data={teamSingle} dataKey="volume" nameKey="name" cx="50%" cy="50%" outerRadius={88} innerRadius={48}
+                      paddingAngle={2} labelLine={false}
                       label={({cx,cy,midAngle,innerRadius,outerRadius,name,percent}:any)=>{
-                        if(percent<0.05) return null;
-                        const R=Math.PI/180,r=innerRadius+(outerRadius-innerRadius)*0.5;
+                        if(percent<0.08) return null;
+                        const R=Math.PI/180,r=innerRadius+(outerRadius-innerRadius)*0.52;
                         return <text x={cx+r*Math.cos(-midAngle*R)} y={cy+r*Math.sin(-midAngle*R)}
-                          fill="white" textAnchor="middle" dominantBaseline="central" fontSize={10} fontWeight="bold">{name}</text>;
+                          fill="white" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight="800">{name}</text>;
                       }}>
-                      {teamSingle.map((t,i)=><Cell key={i} fill={t.color}/>)}
+                      {teamSingle.map((t,i)=><Cell key={i} fill={t.color} stroke="#fff" strokeWidth={2}/>)}
                     </Pie>
-                    <Tooltip formatter={(v:number)=>`฿${fmt(v)}`}/>
+                    <Tooltip
+                      contentStyle={{ borderRadius:12, border:"1px solid #e2e8f0", boxShadow:"0 8px 24px rgba(0,0,0,0.08)", padding:"10px 14px" }}
+                      formatter={(v:number, n:any)=>[`฿${v.toLocaleString(undefined,{maximumFractionDigits:0})} (${((v/grandTotal)*100).toFixed(1)}%)`, n]}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
+                <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-3 pt-3 border-t border-gray-100">
+                  {teamSingle.map((t,i)=>(
+                    <div key={i} className="flex items-center gap-1.5 text-xs">
+                      <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{backgroundColor:t.color}}/>
+                      <span className="font-semibold text-gray-700">Team {t.name}</span>
+                      <span className="text-gray-400 ml-auto">{((t.volume/grandTotal)*100).toFixed(1)}%</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
@@ -1503,7 +1543,7 @@ export default function App() {
                 <h2 className="section-title text-sm font-bold text-gray-800 mb-4">⭐ Best Month & Quick Insight</h2>
                 <div className="space-y-3">
                   <div className="bg-gradient-to-br from-indigo-50 to-violet-50 rounded-xl p-4 border border-indigo-100">
-                    <div className="text-[10px] uppercase tracking-wider text-indigo-600 font-bold mb-1">📅 Best Month (16 months)</div>
+                    <div className="text-[10px] uppercase tracking-wider text-indigo-600 font-bold mb-1">📅 Best Month (19 เดือน)</div>
                     <div className="text-2xl font-bold text-gray-800">{bestMonth.label}</div>
                     <div className="text-sm text-gray-600 mt-1">฿{fmt(bestMonth.vol)}</div>
                   </div>
@@ -1521,16 +1561,21 @@ export default function App() {
               </div>
 
               <div className="md:col-span-2 card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
-                <h2 className="section-title text-sm font-bold text-gray-800 mb-4">🏆 Top 10 — {monthLabel?.label || (filter==="all25"?"รวมปี 2568":"รวมปี 2569")}</h2>
-                <ResponsiveContainer width="100%" height={320}>
-                  <BarChart data={top10} layout="vertical" margin={{left:10,right:30}}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
-                    <XAxis type="number" tick={{fontSize:10}} tickFormatter={fmt}/>
-                    <YAxis type="category" dataKey="code" tick={{fontSize:11,fontFamily:"monospace"}} width={70}/>
-                    <Tooltip formatter={(v:number)=>[`฿${v.toLocaleString()}`,"Volume"]}/>
-                    <Bar dataKey="vol" radius={[0,6,6,0]}>
+                <h2 className="section-title text-sm font-bold text-gray-800 mb-1">🏆 Top 10 — {monthLabel?.label || (filter==="all25"?"รวมปี 2568":"รวมปี 2569")}</h2>
+                <p className="text-xs text-gray-400 mb-4">หน่วย: บาท (฿) · ชื่อและยอดแสดงในแท่ง</p>
+                <ResponsiveContainer width="100%" height={340}>
+                  <BarChart data={top10} layout="vertical" margin={{top:4,right:16,left:4,bottom:4}}>
+                    <CartesianGrid strokeDasharray="0" stroke="#f1f5f9" horizontal={false}/>
+                    <XAxis type="number" tick={{fontSize:10, fill:"#94a3b8"}} tickFormatter={(v:number)=>`฿${fmt(v)}`} tickLine={false} axisLine={false}/>
+                    <YAxis type="category" dataKey="code" tick={{fontSize:11,fill:"#475569"}} tickLine={false} axisLine={false} width={92}
+                      tickFormatter={(v:string)=>{ const hit=top10.find(t=>t.code===v); return hit?.name && hit.name!==v ? `${hit.name}` : v; }}/>
+                    <Tooltip
+                      contentStyle={{ borderRadius:12, border:"1px solid #e2e8f0", boxShadow:"0 8px 24px rgba(0,0,0,0.08)", padding:"10px 14px" }}
+                      formatter={(v:number,_n:any,item:any)=>[`฿${v.toLocaleString(undefined,{maximumFractionDigits:0})}`, item?.payload?.name || "Volume"]}
+                    />
+                    <Bar dataKey="vol" radius={[0,6,6,0]} barSize={22}>
                       {top10.map((_,i)=>(
-                        <Cell key={i} fill={i===0?"#f59e0b":i===1?"#94a3b8":i===2?"#cd7c2f":"#6366f1"}/>
+                        <Cell key={i} fill={i===0?"#f59e0b":i===1?"#94a3b8":i===2?"#d97706":"#4f46e5"} stroke="none"/>
                       ))}
                     </Bar>
                   </BarChart>
@@ -1546,28 +1591,40 @@ export default function App() {
 
             {/* 0. AREA CHART - Cumulative Growth */}
             <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
-              <h2 className="section-title text-sm font-bold text-gray-800 mb-4">🌊 Cumulative Growth — ยอดสะสมรายเดือน</h2>
-              <ResponsiveContainer width="100%" height={240}>
+              <h2 className="section-title text-sm font-bold text-gray-800 mb-1">🌊 Cumulative Growth — ยอดสะสมรายเดือน</h2>
+              <p className="text-xs text-gray-400 mb-4">หน่วย: บาท (฿) · ยอดสะสมตั้งแต่เม.ย. 2568</p>
+              <ResponsiveContainer width="100%" height={250}>
                   <AreaChart data={monthlyTrend.reduce((arr, m) => {
                     const prev = arr.length > 0 ? arr[arr.length-1].cum : 0;
                     arr.push({ ...m, cum: prev + m.volume });
                     return arr;
-                  }, [] as {month: string; volume: number; year: number; cum: number}[])}>
+                  }, [] as {month: string; volume: number; year: number; cum: number}[])} margin={{ top: 8, right: 12, left: 8, bottom: 0 }}>
                     <defs>
                       <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#6366f1" stopOpacity={0.8}/>
-                        <stop offset="100%" stopColor="#6366f1" stopOpacity={0.1}/>
+                        <stop offset="0%" stopColor="#4f46e5" stopOpacity={0.35}/>
+                        <stop offset="100%" stopColor="#4f46e5" stopOpacity={0.02}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
-                    <XAxis dataKey="month" tick={{fontSize:11}}/>
-                    <YAxis tick={{fontSize:10}} tickFormatter={fmt}/>
-                    <Tooltip formatter={(v:number) => `฿${v.toLocaleString()}`}/>
-                    <Area type="monotone" dataKey="cum" stroke="#6366f1" strokeWidth={3} fill="url(#areaGradient)"/>
+                    <CartesianGrid strokeDasharray="0" stroke="#f1f5f9" vertical={false}/>
+                    <XAxis dataKey="month" tick={{fontSize:11, fill:"#64748b"}} tickLine={false} axisLine={{stroke:"#e2e8f0"}} dy={4}/>
+                    <YAxis tick={{fontSize:10, fill:"#94a3b8"}} tickFormatter={(v:number)=>`฿${fmt(v)}`} tickLine={false} axisLine={false} width={56}/>
+                    <Tooltip
+                      contentStyle={{ borderRadius:12, border:"1px solid #e2e8f0", boxShadow:"0 8px 24px rgba(0,0,0,0.08)", padding:"10px 14px" }}
+                      labelStyle={{ fontWeight:700, fontSize:13, marginBottom:4, color:"#0f172a" }}
+                      formatter={(v:number)=>[`฿${v.toLocaleString(undefined,{maximumFractionDigits:0})}`, "ยอดสะสม"]}
+                    />
+                    <Area type="monotone" dataKey="cum" stroke="#4f46e5" strokeWidth={2.5} fill="url(#areaGradient)" dot={{ r:2.5, fill:"#4f46e5", strokeWidth:0 }} activeDot={{ r:5, fill:"#4f46e5", stroke:"#fff", strokeWidth:2 }}/>
                   </AreaChart>
                 </ResponsiveContainer>
-              <div className="text-center mt-3 text-xs text-gray-500">
-                ยอดรวมสะสม 19 เดือน: <strong className="text-indigo-600 font-bold">฿{fmt(MONTHS.reduce((s,m)=>s+(monthTotals[m.key]||0),0))}</strong>
+              <div className="grid grid-cols-2 gap-3 mt-4 pt-3 border-t border-gray-100">
+                <div className="text-center">
+                  <div className="text-[11px] text-gray-400 mb-0.5">ยอดรวมสะสม 19 เดือน</div>
+                  <div className="text-lg font-extrabold text-indigo-600">฿{fmt(MONTHS.reduce((s,m)=>s+(monthTotals[m.key]||0),0))}</div>
+                </div>
+                <div className="text-center border-l border-gray-100">
+                  <div className="text-[11px] text-gray-400 mb-0.5">เฉลี่ย / เดือน</div>
+                  <div className="text-lg font-extrabold text-gray-700">฿{fmt(MONTHS.reduce((s,m)=>s+(monthTotals[m.key]||0),0)/Math.max(1,MONTHS.filter(m=>m.year===2026).length))}</div>
+                </div>
               </div>
             </div>
 
@@ -1767,11 +1824,11 @@ export default function App() {
                 <table className="w-full text-xs border-collapse">
                   <thead>
                     <tr>
-                      <th className="text-left py-1 px-2 text-gray-400 font-medium w-20">ชื่อ</th>
+                      <th className="text-left py-2 px-2 text-gray-500 font-semibold w-24 sticky left-0 bg-white z-10 border-r border-gray-100">ชื่อ</th>
                       {heatMonths.map(mo=>(
-                        <th key={mo.key} className="py-1 px-1 text-center text-gray-400 font-medium w-16">{mo.short}</th>
+                        <th key={mo.key} className="py-2 px-1 text-center text-gray-500 font-semibold w-14">{mo.short}</th>
                       ))}
-                      <th className="py-1 px-2 text-right text-gray-400 font-medium">รวม</th>
+                      <th className="py-2 px-2 text-right text-gray-500 font-semibold bg-gray-50">รวม</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1779,19 +1836,20 @@ export default function App() {
                       const total = heatMonths.reduce((s,mo)=>s+(RAW[mo.key]?.[m.code]||0),0);
                       return (
                         <tr key={m.code} className="border-t border-gray-50">
-                          <td className="py-1 px-2 font-medium text-gray-700">{m.name}</td>
+                          <td className="py-1 px-2 font-semibold text-gray-700 sticky left-0 bg-white z-10 border-r border-gray-100">{m.name}</td>
                           {heatMonths.map(mo=>{
                             const v = RAW[mo.key]?.[m.code]||0;
                             const pct = heatMax>0 ? v/heatMax : 0;
                             const alpha = Math.max(0.08, pct);
                             return (
                               <td key={mo.key} className="py-1 px-1">
-                                <div className="rounded-md text-center py-1 text-xs font-semibold"
+                                <div className="rounded-md text-center py-1.5 text-[11px] font-bold transition-transform hover:scale-105"
                                   style={{
-                                    backgroundColor: v===0 ? "#f9fafb" : `rgba(99,102,241,${alpha})`,
-                                    color: pct > 0.5 ? "white" : pct > 0.1 ? "#4338ca" : "#d1d5db",
+                                    backgroundColor: v===0 ? "#f8fafc" : `rgba(79,70,229,${alpha})`,
+                                    color: pct > 0.5 ? "white" : pct > 0.1 ? "#3730a3" : "#cbd5e1",
+                                    border: v===0 ? "1px dashed #e2e8f0" : "1px solid transparent",
                                   }}>
-                                  {v>0 ? fmt(v) : "—"}
+                                  {v>0 ? fmt(v) : "·"}
                                 </div>
                               </td>
                             );
@@ -1814,10 +1872,11 @@ export default function App() {
 
             {/* 3. TREEMAP */}
             <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
-              <h2 className="text-sm font-semibold text-gray-700 mb-4">
+              <h2 className="section-title text-sm font-bold text-gray-800 mb-1">
                 🗂️ Treemap — สัดส่วน Volume Team 5
                 <span className="ml-2 text-xs font-normal text-gray-400">({monthLabel?.short || (filter==="all25"?"ปี 2568":"ปี 2569")})</span>
               </h2>
+              <p className="text-xs text-gray-400 mb-4">ขนาดพื้นที่ = ยอดขาย · สี = ภูมิภาค</p>
               <ResponsiveContainer width="100%" height={320}>
                 <Treemap
                   data={treemapData}
@@ -1828,28 +1887,31 @@ export default function App() {
                     if (!width || !height || width < 20 || height < 20) return <g/>;
                     return (
                       <g>
-                        <rect x={x+1} y={y+1} width={width-2} height={height-2}
-                          fill={fill} rx={4} opacity={0.85}/>
+                        <rect x={x+1.5} y={y+1.5} width={width-3} height={height-3}
+                          fill={fill} rx={6} opacity={0.92} stroke="#fff" strokeWidth={2}/>
                         {width > 50 && height > 30 && (
                           <text x={x+width/2} y={y+height/2-8} textAnchor="middle"
                             fill="white" fontSize={Math.min(13, width/5)} fontWeight="bold">{name}</text>
                         )}
                         {width > 50 && height > 45 && (
-                          <text x={x+width/2} y={y+height/2+8} textAnchor="middle"
-                            fill="rgba(255,255,255,0.85)" fontSize={Math.min(11, width/6)}>฿{fmt(size)}</text>
+                          <text x={x+width/2} y={y+height/2+9} textAnchor="middle"
+                            fill="rgba(255,255,255,0.9)" fontSize={Math.min(11, width/6)} fontWeight="600">฿{fmt(size)}</text>
                         )}
                       </g>
                     );
                   }}
                 >
-                  <Tooltip formatter={(v:number)=>`฿${v.toLocaleString()}`}/>
+                  <Tooltip
+                    contentStyle={{ borderRadius:12, border:"1px solid #e2e8f0", boxShadow:"0 8px 24px rgba(0,0,0,0.08)", padding:"10px 14px" }}
+                    formatter={(v:number)=>`฿${v.toLocaleString(undefined,{maximumFractionDigits:0})}`}
+                  />
                 </Treemap>
               </ResponsiveContainer>
-              <div className="flex flex-wrap gap-3 mt-3">
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-gray-100">
                 {Object.entries(REGION_COLORS).filter(([r])=>r!=="—").map(([r,c])=>(
-                  <div key={r} className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 rounded" style={{backgroundColor:c}}/>
-                    <span className="text-xs text-gray-500">{r}</span>
+                  <div key={r} className="flex items-center gap-1.5 text-xs">
+                    <div className="w-2.5 h-2.5 rounded-sm" style={{backgroundColor:c}}/>
+                    <span className="text-gray-500">{r}</span>
                   </div>
                 ))}
               </div>
@@ -1857,21 +1919,30 @@ export default function App() {
 
             {/* 4. TREND LINE */}
             <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
-              <h2 className="text-sm font-semibold text-gray-700 mb-4">
-                📈 Trend Line — Top 5 Team 5 (เม.ย. 2568 – ต.ค. 2569)
+              <h2 className="section-title text-sm font-bold text-gray-800 mb-1">
+                📈 Trend Line — Top 5 Team 5
+                <span className="ml-2 text-xs font-normal text-gray-400">เม.ย. 2568 – ต.ค. 2569</span>
               </h2>
-              <ResponsiveContainer width="100%" height={280}>
-                <LineChart data={trendData} margin={{left:10,right:20}}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
-                  <XAxis dataKey="month" tick={{fontSize:11}}/>
-                  <YAxis tick={{fontSize:10}} tickFormatter={fmt}/>
-                  <Tooltip formatter={(v:number,name:string)=>[`฿${v.toLocaleString()}`,name]}/>
-                  <Legend/>
+              <p className="text-xs text-gray-400 mb-4">หน่วย: บาท (฿) · เส้นขาด = เดือนที่ไม่มียอด</p>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={trendData} margin={{top:8, right:16, left:8, bottom:0}}>
+                  <CartesianGrid strokeDasharray="0" stroke="#f1f5f9" vertical={false}/>
+                  <XAxis dataKey="month" tick={{fontSize:11, fill:"#64748b"}} tickLine={false} axisLine={{stroke:"#e2e8f0"}} dy={4}/>
+                  <YAxis tick={{fontSize:10, fill:"#94a3b8"}} tickFormatter={(v:number)=>`฿${fmt(v)}`} tickLine={false} axisLine={false} width={56}/>
+                  <Tooltip
+                    contentStyle={{ borderRadius:12, border:"1px solid #e2e8f0", boxShadow:"0 8px 24px rgba(0,0,0,0.08)", padding:"10px 14px" }}
+                    labelStyle={{ fontWeight:700, fontSize:13, marginBottom:4, color:"#0f172a" }}
+                    formatter={(v:number,name:string)=>[`฿${v.toLocaleString(undefined,{maximumFractionDigits:0})}`,name]}
+                  />
+                  <Legend
+                    iconType="circle" iconSize={8}
+                    wrapperStyle={{ fontSize:12, paddingTop:12 }}
+                  />
                   {top5Codes.map((p,i)=>(
                     <Line key={p.name} type="monotone" dataKey={p.name}
                       stroke={TREND_COLORS[i]} strokeWidth={2.5}
-                      dot={{r:4,fill:TREND_COLORS[i]}}
-                      activeDot={{r:6}}
+                      dot={{r:3,fill:TREND_COLORS[i],strokeWidth:0}}
+                      activeDot={{r:5,stroke:"#fff",strokeWidth:2}}
                       connectNulls={false}/>
                   ))}
                 </LineChart>
@@ -2842,26 +2913,36 @@ export default function App() {
             </div>
 
             <div className="card-lift bg-white rounded-2xl p-5 shadow-md border border-gray-100/80">
-              <h2 className="section-title text-sm font-bold text-gray-800 mb-4">📊 Monthly Growth (MoM %)</h2>
+              <h2 className="section-title text-sm font-bold text-gray-800 mb-1">📊 Monthly Growth (MoM %)</h2>
+              <p className="text-xs text-gray-400 mb-4">% เปลี่ยนแปลงเทียบเดือนก่อนหน้า · เส้น 0% = คงที่</p>
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={monthlyTrend.map((m, i, arr) => ({
                   month: m.month,
                   growth: i > 0 ? ((m.volume - arr[i-1].volume) / Math.max(arr[i-1].volume, 1)) * 100 : 0,
-                }))}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0"/>
-                  <XAxis dataKey="month" tick={{fontSize:11}}/>
-                  <YAxis tick={{fontSize:10}} tickFormatter={(v) => `${v.toFixed(0)}%`}/>
-                  <Tooltip formatter={(v:number) => `${v.toFixed(1)}%`}/>
-                  <Bar dataKey="growth" radius={[6,6,0,0]}>
+                }))} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="0" stroke="#f1f5f9" vertical={false}/>
+                  <XAxis dataKey="month" tick={{fontSize:11, fill:"#64748b"}} tickLine={false} axisLine={{stroke:"#e2e8f0"}} dy={4}/>
+                  <YAxis tick={{fontSize:10, fill:"#94a3b8"}} tickFormatter={(v) => `${v.toFixed(0)}%`} tickLine={false} axisLine={false} width={48}/>
+                  <ReferenceLine y={0} stroke="#94a3b8" strokeWidth={1.5}/>
+                  <Tooltip
+                    contentStyle={{ borderRadius:12, border:"1px solid #e2e8f0", boxShadow:"0 8px 24px rgba(0,0,0,0.08)", padding:"10px 14px" }}
+                    labelStyle={{ fontWeight:700, fontSize:13, marginBottom:4, color:"#0f172a" }}
+                    formatter={(v:number)=>[`${v>0?"+":""}${v.toFixed(1)}%`, "MoM"]}
+                  />
+                  <Bar dataKey="growth" radius={[6,6,0,0]} maxBarSize={40}>
                     {monthlyTrend.map((_, i) => (
-                      <Cell key={i} fill={i === 0 ? "#9ca3af" : (monthlyTrend[i].volume >= monthlyTrend[i-1].volume ? "#10b981" : "#ef4444")} />
+                      <Cell key={i}
+                        fill={i === 0 ? "#cbd5e1" : (monthlyTrend[i].volume >= monthlyTrend[i-1].volume ? "#10b981" : "#ef4444")}
+                        stroke="none"
+                      />
                     ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-              <div className="flex justify-center gap-4 mt-3 text-xs text-gray-500">
-                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-emerald-500 inline-block"/>เติบโต</span>
-                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-red-500 inline-block"/>ลดลง</span>
+              <div className="flex justify-center gap-5 mt-3 text-xs text-gray-500">
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block"/>เติบโต</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-red-500 inline-block"/>ลดลง</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-gray-300 inline-block"/>เดือนแรก</span>
               </div>
             </div>
           </div>
